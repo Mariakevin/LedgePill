@@ -1,0 +1,184 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check platform versions
+        run: python3 scripts/check_platform_versions.py
+      - name: Install GTK stack
+        # noble has no gtk4-layer-shell package; the app falls back cleanly
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-gi python3-gi-cairo gir1.2-gtk-4.0 \
+            gir1.2-adw-1 xvfb dbus
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests -v
+      - name: CLI version check
+        run: dbus-run-session -- xvfb-run -a python3 -m lostisland --version
+      - name: GTK startup smoke test
+        run: dbus-run-session -- xvfb-run -a python3 -m lostisland --smoke-test
+      - name: Build deb
+        run: ./packaging/build-deb.sh
+      - name: Lint deb
+        run: dpkg-deb --info dist/*.deb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lost-island-deb
+          path: dist/*.deb
+
+  rpm:
+    runs-on: ubuntu-latest
+    container: fedora:45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install rpm tooling
+        run: dnf install -y rpm-build rpmdevtools
+      - name: Build rpm
+        run: |
+          VER=$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)
+          rpmdev-setuptree
+          tar czf ~/rpmbuild/SOURCES/v$VER.tar.gz \
+            --transform "s,^,lost-island-$VER/," \
+            lostisland data packaging LICENSE pyproject.toml
+          rpmbuild -bb packaging/lost-island.spec
+          mkdir -p dist && cp ~/rpmbuild/RPMS/noarch/*.rpm dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lost-island-rpm
+          path: dist/*.rpm
+
+  arch:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GTK stack
+        run: >
+          pacman -Syu --noconfirm python python-gobject python-cairo gtk4
+          gtk4-layer-shell libadwaita xorg-server-xvfb dbus
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: CLI version check
+        run: dbus-run-session -- xvfb-run -a python -m lostisland --version
+      - name: GTK startup smoke test
+        run: dbus-run-session -- xvfb-run -a python -m lostisland --smoke-test
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Publish
+        run: dotnet publish windows/LostIsland.csproj -c Release -r win-x64
+          --self-contained true -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -o dist/windows
+      - name: Validate single-file publish
+        shell: pwsh
+        run: |
+          if (-not (Test-Path dist/windows/LostIsland.exe)) { throw "Missing LostIsland.exe" }
+          $unexpected = Get-ChildItem dist/windows -File | Where-Object { $_.Name -notin @("LostIsland.exe", "LostIsland.pdb") }
+          if ($unexpected) { throw "Unexpected publish sidecars: $($unexpected.Name -join ', ')" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LostIsland-windows-x64
+          path: dist/windows/LostIsland.exe
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: cd macos && swift build -c release
+      - name: Bundle app
+        run: cd macos && ./make-app.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LostIsland-macos
+          path: macos/LostIsland-macos.zip
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+      - name: Configure Android release signing
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$ANDROID_KEYSTORE_BASE64" || -z "$ANDROID_KEYSTORE_PASSWORD" || \
+                -z "$ANDROID_KEY_ALIAS" || -z "$ANDROID_KEY_PASSWORD" ]]; then
+            echo "Configure Android signing secrets before creating a release tag." >&2
+            exit 1
+          fi
+          keystore="$RUNNER_TEMP/lost-island-upload-key.jks"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore"
+          {
+            echo "ANDROID_KEYSTORE_PATH=$keystore"
+            echo "ANDROID_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD"
+            echo "ANDROID_KEY_ALIAS=$ANDROID_KEY_ALIAS"
+            echo "ANDROID_KEY_PASSWORD=$ANDROID_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+      - name: Assemble
+        run: cd android && gradle assembleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LostIsland-android
+          path: android/app/build/outputs/apk/release/app-release.apk
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [linux, rpm, windows, macos, android]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: release-${{ github.ref }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          assets=(
+            artifacts/lost-island-deb/*.deb
+            artifacts/lost-island-rpm/*.rpm
+            artifacts/LostIsland-windows-x64/LostIsland.exe
+            artifacts/LostIsland-macos/LostIsland-macos.zip
+            artifacts/LostIsland-android/app-release.apk
+          )
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" --repo "$GITHUB_REPOSITORY" --clobber "${assets[@]}"
+          else
+            gh release create "$tag" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "Lost Island ${tag}" \
+              --generate-notes \
+              --verify-tag \
+              "${assets[@]}"
+          fi
