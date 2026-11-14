@@ -19,40 +19,40 @@ gi.require_version("GdkPixbuf", "2.0")
 
 from gi.repository import GdkPixbuf, GLib, Gtk
 
-from lostisland.app import _needs_audio_service, _should_suppress_gdk_log
-from lostisland.services.audio import AudioService, _parse_default_source_state
-from lostisland.services.bluetooth import (
+from ledgepill.app import _needs_audio_service, _should_suppress_gdk_log
+from ledgepill.services.audio import AudioService, _parse_default_source_state
+from ledgepill.services.bluetooth import (
     ADAPTER_IFACE,
     BATTERY_IFACE,
     DEVICE_IFACE,
     BluetoothService,
 )
-from lostisland.services.brightness import BrightnessService
-from lostisland.services.clipboard import ClipboardService
-from lostisland.services.desktop import CursorWatcher, DesktopService
-from lostisland.services.feeds import FeedService, _clean_text, _SafeRedirectHandler
-from lostisland.services.lyrics import LyricsService
-from lostisland.services.mpris import (
+from ledgepill.services.brightness import BrightnessService
+from ledgepill.services.clipboard import ClipboardService
+from ledgepill.services.desktop import CursorWatcher, DesktopService
+from ledgepill.services.feeds import FeedService, _clean_text, _SafeRedirectHandler
+from ledgepill.services.lyrics import LyricsService
+from ledgepill.services.mpris import (
     MprisService,
     detect_desktop_accent,
     extract_accent_color,
 )
-from lostisland.services.network import NetworkService
-from lostisland.services.notify import NotifyService
-from lostisland.services.ollama import OllamaService, _lmstudio_url, _ollama_url
-from lostisland.services.power import PowerService
-from lostisland.services.privacy import PrivacyService
-from lostisland.services.productivity import ProductivityService
-from lostisland.services.system import SystemService
-from lostisland.services.system_agent import SystemAgent
-from lostisland.services.weather import WeatherService, _icon_for_code
-from lostisland.ui.draw import brightness_icon, volume_icon
-from lostisland.ui.expanded import (
+from ledgepill.services.network import NetworkService
+from ledgepill.services.notify import NotifyService
+from ledgepill.services.ollama import OllamaService, _lmstudio_url, _ollama_url
+from ledgepill.services.power import PowerService
+from ledgepill.services.privacy import PrivacyService
+from ledgepill.services.productivity import ProductivityService
+from ledgepill.services.system import SystemService
+from ledgepill.services.system_agent import SystemAgent
+from ledgepill.services.weather import WeatherService, _icon_for_code
+from ledgepill.ui.draw import brightness_icon, volume_icon
+from ledgepill.ui.expanded import (
     Expanded,
     _hex_rgb,
     classify_clipboard_text,
 )
-from lostisland.ui.island import Island
+from ledgepill.ui.island import Island
 
 
 class ServicesTest(unittest.TestCase):
@@ -419,7 +419,7 @@ class ServicesTest(unittest.TestCase):
         self.assertEqual(_hex_rgb("not-a-color"), (1.0, 0.62, 0.04))
 
         css_path = os.path.join(
-            os.path.dirname(__file__), "..", "lostisland", "ui", "style.css"
+            os.path.dirname(__file__), "..", "ledgepill", "ui", "style.css"
         )
         with open(css_path) as f:
             css = (
@@ -1067,7 +1067,7 @@ class ServicesTest(unittest.TestCase):
                     "pid": 402,
                     "app": "Code",
                     "desktop": "com.microsoft.VSCode",
-                    "title": "expanded.py - lost-island - Visual Studio Code",
+                    "title": "expanded.py - ledge-pill - Visual Studio Code",
                     "active": False,
                 },
             ]
@@ -1194,11 +1194,11 @@ class ServicesTest(unittest.TestCase):
         svc = ProductivityService(cfg, system_agent=agent)
         with (
             mock.patch(
-                "lostisland.services.productivity.ProductivityService._dispatch_ai",
+                "ledgepill.services.productivity.ProductivityService._dispatch_ai",
                 return_value="A concise answer.",
             ) as dispatch,
             mock.patch(
-                "lostisland.services.productivity.GLib.idle_add",
+                "ledgepill.services.productivity.GLib.idle_add",
                 side_effect=lambda fn, *args: fn(*args),
             ),
         ):
@@ -1298,7 +1298,7 @@ class ServicesTest(unittest.TestCase):
             return None
 
         with mock.patch(
-            "lostisland.services.weather._http_json", side_effect=fake_json
+            "ledgepill.services.weather._http_json", side_effect=fake_json
         ):
             res_city = WeatherService._fetch_open_meteo("Tokyo")
             self.assertIsNotNone(res_city)
@@ -1484,7 +1484,7 @@ class ServicesTest(unittest.TestCase):
     def test_system_agent_tools_and_ai_tool_loop(self):
         with tempfile.TemporaryDirectory() as tmp:
             old_path = os.path.join(tmp, "cfg.json")
-            from lostisland import config as _cfg_mod
+            from ledgepill import config as _cfg_mod
 
             orig_cfg_path = _cfg_mod.CONFIG_PATH
             _cfg_mod.CONFIG_PATH = old_path
@@ -1630,11 +1630,11 @@ class ServicesTest(unittest.TestCase):
 
                 with (
                     mock.patch(
-                        "lostisland.services.productivity._post_json",
+                        "ledgepill.services.productivity._post_json",
                         side_effect=fake_post,
                     ),
                     mock.patch(
-                        "lostisland.services.productivity.GLib.idle_add",
+                        "ledgepill.services.productivity.GLib.idle_add",
                         side_effect=lambda fn, *a: fn(*a),
                     ),
                 ):
@@ -1648,7 +1648,7 @@ class ServicesTest(unittest.TestCase):
                 )
 
                 with mock.patch(
-                    "lostisland.services.productivity._post_json",
+                    "ledgepill.services.productivity._post_json",
                     return_value={
                         "choices": [
                             {
@@ -1714,7 +1714,7 @@ class ServicesTest(unittest.TestCase):
                     }
 
                 with mock.patch(
-                    "lostisland.services.productivity._post_json",
+                    "ledgepill.services.productivity._post_json",
                     side_effect=fake_lmstudio_post,
                 ):
                     lm_reply = ProductivityService._run_native_tool_loop(
@@ -1735,7 +1735,7 @@ class ServicesTest(unittest.TestCase):
 
                 seen_payloads.clear()
                 with mock.patch(
-                    "lostisland.services.productivity._post_json"
+                    "ledgepill.services.productivity._post_json"
                 ) as m_post:
                     m_post.return_value = {"content": [{"text": "ok"}]}
                     ProductivityService._dispatch_ai(
@@ -1793,7 +1793,7 @@ class ServicesTest(unittest.TestCase):
             daemon=True,
         )
         with mock.patch(
-            "lostisland.services.system_agent.GLib.idle_add",
+            "ledgepill.services.system_agent.GLib.idle_add",
             side_effect=capture_idle,
         ):
             worker.start()
@@ -1851,7 +1851,7 @@ class ServicesTest(unittest.TestCase):
         mpris._add_player.assert_not_called()
 
     def test_desktop_app_id_aliases_and_wmctrl_parsing(self):
-        from lostisland.services.desktop import _app_id_aliases, _wmctrl_windows
+        from ledgepill.services.desktop import _app_id_aliases, _wmctrl_windows
 
         self.assertIn("spotify", _app_id_aliases("com.spotify.client"))
         self.assertIn("telegram", _app_id_aliases("org.telegram.desktop"))
@@ -1930,7 +1930,7 @@ class ServicesTest(unittest.TestCase):
             self.assertEqual(m_post.call_args.args[1]["keep_alive"], "15m")
 
         with mock.patch(
-            "lostisland.services.ollama.GLib.idle_add",
+            "ledgepill.services.ollama.GLib.idle_add",
             side_effect=lambda fn, *a: fn(*a),
         ):
             svc.record_metrics(48.67, 120, "qwen2.5:7b")
@@ -1938,7 +1938,7 @@ class ServicesTest(unittest.TestCase):
         self.assertEqual(svc.last_eval_tokens, 120)
 
     def test_productivity_streaming_think_stripping_and_tool_fallback(self):
-        from lostisland.services.productivity import (
+        from ledgepill.services.productivity import (
             _stream_ollama_chat,
             _strip_thinking,
         )
@@ -1957,7 +1957,7 @@ class ServicesTest(unittest.TestCase):
         fake_resp.__enter__.return_value = iter(ndjson_lines)
         seen_tokens = []
         with mock.patch(
-            "lostisland.services.productivity.urllib.request.urlopen",
+            "ledgepill.services.productivity.urllib.request.urlopen",
             return_value=fake_resp,
         ):
             text, stats = _stream_ollama_chat(
@@ -2002,10 +2002,10 @@ class ServicesTest(unittest.TestCase):
         prod.connect("ai-reply", lambda _s, txt, ok: replies.append((txt, ok)))
         with (
             mock.patch(
-                "lostisland.services.productivity._post_json", side_effect=fake_post
+                "ledgepill.services.productivity._post_json", side_effect=fake_post
             ),
             mock.patch(
-                "lostisland.services.productivity.GLib.idle_add",
+                "ledgepill.services.productivity.GLib.idle_add",
                 side_effect=lambda fn, *a: fn(*a),
             ),
         ):
@@ -2019,7 +2019,7 @@ class ServicesTest(unittest.TestCase):
         self.assertEqual(replies[-1], ("Cancelled.", False))
 
     def test_system_agent_deep_os_tools(self):
-        from lostisland.services.system_agent import (
+        from ledgepill.services.system_agent import (
             _read_disk_usage,
             _read_systemd_status,
             _read_top_processes,
@@ -2102,7 +2102,7 @@ class ServicesTest(unittest.TestCase):
         )
 
     def test_todo_service_and_agent_tools(self):
-        from lostisland.services.todos import TodoService
+        from ledgepill.services.todos import TodoService
 
         with tempfile.TemporaryDirectory() as tmp:
             todo_path = os.path.join(tmp, "todos.json")
@@ -2137,7 +2137,7 @@ class ServicesTest(unittest.TestCase):
             self.assertEqual(res_clear_done["removed"], 1)
 
     def test_desktop_coding_agent_activity_detection(self):
-        from lostisland.services.desktop import _AGENT_PROCS
+        from ledgepill.services.desktop import _AGENT_PROCS
 
         self.assertEqual(_AGENT_PROCS["claude"], "Claude Code")
         desk = DesktopService()
@@ -2148,7 +2148,7 @@ class ServicesTest(unittest.TestCase):
         self.assertEqual(events, ["Claude Code"])
 
     def test_calendar_ics_parser_and_agent_tool(self):
-        from lostisland.services.calendar import CalendarService, parse_ics_events
+        from ledgepill.services.calendar import CalendarService, parse_ics_events
 
         now_ts = 1_800_000_000.0
         dt_start = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime(now_ts + 480))
@@ -2188,16 +2188,16 @@ class ServicesTest(unittest.TestCase):
         self.assertEqual(len(res["events"]), 1)
 
     def test_calendar_service_restarts_after_stop(self):
-        from lostisland.services.calendar import CalendarService
+        from ledgepill.services.calendar import CalendarService
 
         cal = CalendarService([])
         with (
             mock.patch.object(cal, "refresh_now") as refresh,
             mock.patch(
-                "lostisland.services.calendar.GLib.timeout_add_seconds",
+                "ledgepill.services.calendar.GLib.timeout_add_seconds",
                 side_effect=[11, 12],
             ) as add_timer,
-            mock.patch("lostisland.services.calendar.GLib.source_remove"),
+            mock.patch("ledgepill.services.calendar.GLib.source_remove"),
         ):
             cal.start()
             self.assertEqual(refresh.call_count, 1)
@@ -2219,7 +2219,7 @@ class ServicesTest(unittest.TestCase):
             self.assertEqual(add_timer.call_count, 2)
 
     def test_kdeconnect_share_file(self):
-        from lostisland.services.kdeconnect import KdeConnectService
+        from ledgepill.services.kdeconnect import KdeConnectService
 
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "share.txt")
@@ -2239,7 +2239,7 @@ class ServicesTest(unittest.TestCase):
     def test_webhook_agent_endpoint(self):
         import urllib.request
 
-        from lostisland.services.webhook import WebhookService
+        from ledgepill.services.webhook import WebhookService
 
         received = []
         with tempfile.TemporaryDirectory() as tmp:
@@ -2250,7 +2250,7 @@ class ServicesTest(unittest.TestCase):
                 on_agent_event=lambda ag, st, msg: received.append((ag, st, msg)),
             )
             with mock.patch(
-                "lostisland.services.webhook.GLib.idle_add",
+                "ledgepill.services.webhook.GLib.idle_add",
                 side_effect=lambda fn, *a: fn(*a),
             ):
                 if wh.start():

@@ -22,14 +22,14 @@ from gi.repository import Gdk, GLib, Gtk
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from lostisland import config
-from lostisland.services.weather import WeatherService
-from lostisland.ui.island import Island
+from ledgepill import config
+from ledgepill.services.weather import WeatherService
+from ledgepill.ui.island import Island
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else "docs/demo.gif"
-ART = "/tmp/lost-island-demo-art.png"
+ART = "/tmp/ledge-pill-demo-art.png"
 SIZE = (760, 480)
-RAW = "/tmp/lost-island-demo.mp4"
+RAW = "/tmp/ledge-pill-demo.mp4"
 
 
 class FakePlayer:
@@ -86,7 +86,7 @@ def paint_art():
 def load_css():
     provider = Gtk.CssProvider()
     css_path = os.path.join(
-        os.path.dirname(__file__), "..", "lostisland", "ui", "style.css"
+        os.path.dirname(__file__), "..", "ledgepill", "ui", "style.css"
     )
     with open(css_path) as f:
         css = (

@@ -3,9 +3,9 @@ import os
 import tempfile
 import unittest
 
-from lostisland import config
-from lostisland.app import layer_shell_hint
-from lostisland.services.brightness import BrightnessService
+from ledgepill import config
+from ledgepill.app import layer_shell_hint
+from ledgepill.services.brightness import BrightnessService
 
 
 class ConfigTest(unittest.TestCase):
@@ -24,7 +24,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_load_returns_deep_copy_of_defaults(self):
         old_path = config.CONFIG_PATH
-        config.CONFIG_PATH = "/nonexistent/lost-island-test-config.json"
+        config.CONFIG_PATH = "/nonexistent/ledge-pill-test-config.json"
         try:
             loaded = config.load()
             loaded["modules"]["music"] = False

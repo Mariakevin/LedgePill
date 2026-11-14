@@ -2,9 +2,9 @@
 import PackageDescription
 
 let package = Package(
-    name: "LostIsland",
+    name: "LedgePill",
     platforms: [.macOS(.v13)],
     targets: [
-        .executableTarget(name: "LostIsland")
+        .executableTarget(name: "LedgePill")
     ]
 )

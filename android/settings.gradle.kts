@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "lost-island"
+rootProject.name = "ledge-pill"
 include(":app")

@@ -15,15 +15,15 @@ if (releaseSigning.any { !it.isNullOrBlank() } && !releaseSigningConfigured) {
 }
 
 android {
-    namespace = "it.zorn.lostisland"
+    namespace = "it.zorn.ledgepill"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "it.zorn.lostisland"
+        applicationId = "it.zorn.ledgepill"
         minSdk = 26
         targetSdk = 34
         versionCode = 7
-        versionName = "1.8.0"
+        versionName = "1.0.0"
     }
 
     signingConfigs {

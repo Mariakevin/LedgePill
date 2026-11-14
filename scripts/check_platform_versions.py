@@ -38,7 +38,7 @@ def main() -> int:
         if actual != version:
             errors.append(f"{name}: expected {version}, got {actual}")
 
-    windows = ET.parse(ROOT / "windows/LostIsland.csproj").getroot()
+    windows = ET.parse(ROOT / "windows/LedgePill.csproj").getroot()
     windows_versions = {
         "Windows Version": "Version",
         "Windows assembly version": "AssemblyVersion",

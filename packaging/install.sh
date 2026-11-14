@@ -1,13 +1,13 @@
 #!/bin/bash
-# Universal installer for Lost Island (Linux).
+# Universal installer for LedgePill (Linux).
 #   from a checkout:  sudo ./packaging/install.sh [--autostart]
-#   from anywhere:    curl -fsSL https://raw.githubusercontent.com/Mariakevin/lost-island-next/main/packaging/install.sh | sudo bash
+#   from anywhere:    curl -fsSL https://raw.githubusercontent.com/Mariakevin/ledge-pill-next/main/packaging/install.sh | sudo bash
 set -euo pipefail
 
-REPO="https://github.com/Mariakevin/lost-island-next"
+REPO="https://github.com/Mariakevin/ledge-pill-next"
 PREFIX=/usr/local
 
-say() { printf '\033[1;33m[lost-island]\033[0m %s\n' "$*"; }
+say() { printf '\033[1;33m[ledge-pill]\033[0m %s\n' "$*"; }
 
 [ "$(id -u)" -eq 0 ] || { say "run me with sudo"; exit 1; }
 
@@ -47,33 +47,33 @@ fi
 
 # ---- source ----------------------------------------------------------------
 SRC=$(cd "$(dirname "${BASH_SOURCE[0]:-.}")/.." 2>/dev/null && pwd || true)
-if [ ! -f "$SRC/lostisland/app.py" ]; then
+if [ ! -f "$SRC/ledgepill/app.py" ]; then
   say "fetching sources"
   TMP=$(mktemp -d)
   trap 'rm -rf "$TMP"' EXIT
-  git clone --depth 1 "$REPO" "$TMP/lost-island"
-  SRC="$TMP/lost-island"
+  git clone --depth 1 "$REPO" "$TMP/ledge-pill"
+  SRC="$TMP/ledge-pill"
 fi
 
 # ---- install ---------------------------------------------------------------
 say "installing to $PREFIX"
-rm -rf "$PREFIX/lib/lost-island"
-mkdir -p "$PREFIX/lib/lost-island" "$PREFIX/bin"
-cp -r "$SRC/lostisland" "$PREFIX/lib/lost-island/"
-find "$PREFIX/lib/lost-island" -name __pycache__ -type d -exec rm -rf {} + 2>/dev/null || true
+rm -rf "$PREFIX/lib/ledge-pill"
+mkdir -p "$PREFIX/lib/ledge-pill" "$PREFIX/bin"
+cp -r "$SRC/ledgepill" "$PREFIX/lib/ledge-pill/"
+find "$PREFIX/lib/ledge-pill" -name __pycache__ -type d -exec rm -rf {} + 2>/dev/null || true
 
-cat > "$PREFIX/bin/lost-island" <<EOF
+cat > "$PREFIX/bin/ledge-pill" <<EOF
 #!/bin/sh
-PYTHONPATH=$PREFIX/lib/lost-island exec python3 -m lostisland "\$@"
+PYTHONPATH=$PREFIX/lib/ledge-pill exec python3 -m ledgepill "\$@"
 EOF
-chmod 755 "$PREFIX/bin/lost-island"
+chmod 755 "$PREFIX/bin/ledge-pill"
 
-install -Dm644 "$SRC/data/lost-island.desktop" /usr/share/applications/lost-island.desktop
-install -Dm644 "$SRC/data/lost-island.svg" /usr/share/icons/hicolor/scalable/apps/lost-island.svg
-install -Dm644 "$SRC/data/lost-island-mic-led.conf" \
-  /usr/lib/modules-load.d/90-lost-island-mic-led.conf
-install -Dm644 "$SRC/data/99-lost-island-mic-led.rules" \
-  /usr/lib/udev/rules.d/99-lost-island-mic-led.rules
+install -Dm644 "$SRC/data/ledge-pill.desktop" /usr/share/applications/ledge-pill.desktop
+install -Dm644 "$SRC/data/ledge-pill.svg" /usr/share/icons/hicolor/scalable/apps/ledge-pill.svg
+install -Dm644 "$SRC/data/ledge-pill-mic-led.conf" \
+  /usr/lib/modules-load.d/90-ledge-pill-mic-led.conf
+install -Dm644 "$SRC/data/99-ledge-pill-mic-led.rules" \
+  /usr/lib/udev/rules.d/99-ledge-pill-mic-led.rules
 if command -v modprobe >/dev/null 2>&1 && ! modprobe snd_ctl_led; then
   say "could not load snd_ctl_led now; the module-load setting will retry at boot"
 fi
@@ -83,10 +83,10 @@ if command -v udevadm >/dev/null 2>&1 && [ -S /run/udev/control ]; then
 else
   say "udev is not running; reboot after installing to apply the microphone LED rule"
 fi
-sed "s|/usr/bin/lost-island|$PREFIX/bin/lost-island|" \
-  "$SRC/data/lost-island.service" > /usr/lib/systemd/user/lost-island.service
+sed "s|/usr/bin/ledge-pill|$PREFIX/bin/ledge-pill|" \
+  "$SRC/data/ledge-pill.service" > /usr/lib/systemd/user/ledge-pill.service
 
-say "installed. start with: lost-island"
+say "installed. start with: ledge-pill"
 if [ "${1:-}" = "--autostart" ]; then
   U=${SUDO_USER:-}
   if [ -n "$U" ]; then
@@ -96,17 +96,17 @@ if [ "${1:-}" = "--autostart" ]; then
       if runuser -u "$U" -- env \
         XDG_RUNTIME_DIR="$USER_RUNTIME" \
         DBUS_SESSION_BUS_ADDRESS="unix:path=$USER_RUNTIME/bus" \
-        systemctl --user enable --now lost-island.service; then
+        systemctl --user enable --now ledge-pill.service; then
         say "autostart enabled for $U"
       else
-        say "could not finish autostart setup for $U; run 'systemctl --user enable --now lost-island.service' in that user's session"
+        say "could not finish autostart setup for $U; run 'systemctl --user enable --now ledge-pill.service' in that user's session"
       fi
     else
-      say "no active user session found; run 'systemctl --user enable --now lost-island.service' from $U's session to enable autostart"
+      say "no active user session found; run 'systemctl --user enable --now ledge-pill.service' from $U's session to enable autostart"
     fi
   else
-    say "no invoking user was detected; run 'systemctl --user enable --now lost-island.service' from your session to enable autostart"
+    say "no invoking user was detected; run 'systemctl --user enable --now ledge-pill.service' from your session to enable autostart"
   fi
 else
-  say "autostart: systemctl --user enable --now lost-island.service"
+  say "autostart: systemctl --user enable --now ledge-pill.service"
 fi

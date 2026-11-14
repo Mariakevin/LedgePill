@@ -22,16 +22,16 @@ jobs:
       - name: Unit tests
         run: dbus-run-session -- xvfb-run -a python3 -m unittest discover -s tests -v
       - name: CLI version check
-        run: dbus-run-session -- xvfb-run -a python3 -m lostisland --version
+        run: dbus-run-session -- xvfb-run -a python3 -m ledgepill --version
       - name: GTK startup smoke test
-        run: dbus-run-session -- xvfb-run -a python3 -m lostisland --smoke-test
+        run: dbus-run-session -- xvfb-run -a python3 -m ledgepill --smoke-test
       - name: Build deb
         run: ./packaging/build-deb.sh
       - name: Lint deb
         run: dpkg-deb --info dist/*.deb
       - uses: actions/upload-artifact@v4
         with:
-          name: lost-island-deb
+          name: ledge-pill-deb
           path: dist/*.deb
 
   rpm:
@@ -46,13 +46,13 @@ jobs:
           VER=$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)
           rpmdev-setuptree
           tar czf ~/rpmbuild/SOURCES/v$VER.tar.gz \
-            --transform "s,^,lost-island-$VER/," \
-            lostisland data packaging LICENSE pyproject.toml
-          rpmbuild -bb packaging/lost-island.spec
+            --transform "s,^,ledge-pill-$VER/," \
+            ledgepill data packaging LICENSE pyproject.toml
+          rpmbuild -bb packaging/ledge-pill.spec
           mkdir -p dist && cp ~/rpmbuild/RPMS/noarch/*.rpm dist/
       - uses: actions/upload-artifact@v4
         with:
-          name: lost-island-rpm
+          name: ledge-pill-rpm
           path: dist/*.rpm
 
   arch:
@@ -67,9 +67,9 @@ jobs:
       - name: Unit tests
         run: dbus-run-session -- xvfb-run -a python -m unittest discover -s tests -v
       - name: CLI version check
-        run: dbus-run-session -- xvfb-run -a python -m lostisland --version
+        run: dbus-run-session -- xvfb-run -a python -m ledgepill --version
       - name: GTK startup smoke test
-        run: dbus-run-session -- xvfb-run -a python -m lostisland --smoke-test
+        run: dbus-run-session -- xvfb-run -a python -m ledgepill --smoke-test
 
   windows:
     runs-on: windows-latest
@@ -79,20 +79,20 @@ jobs:
         with:
           dotnet-version: "8.0.x"
       - name: Publish
-        run: dotnet publish windows/LostIsland.csproj -c Release -r win-x64
+        run: dotnet publish windows/LedgePill.csproj -c Release -r win-x64
           --self-contained true -p:PublishSingleFile=true
           -p:IncludeNativeLibrariesForSelfExtract=true
           -o dist/windows
       - name: Validate single-file publish
         shell: pwsh
         run: |
-          if (-not (Test-Path dist/windows/LostIsland.exe)) { throw "Missing LostIsland.exe" }
-          $unexpected = Get-ChildItem dist/windows -File | Where-Object { $_.Name -notin @("LostIsland.exe", "LostIsland.pdb") }
+          if (-not (Test-Path dist/windows/LedgePill.exe)) { throw "Missing LedgePill.exe" }
+          $unexpected = Get-ChildItem dist/windows -File | Where-Object { $_.Name -notin @("LedgePill.exe", "LedgePill.pdb") }
           if ($unexpected) { throw "Unexpected publish sidecars: $($unexpected.Name -join ', ')" }
       - uses: actions/upload-artifact@v4
         with:
-          name: LostIsland-windows-x64
-          path: dist/windows/LostIsland.exe
+          name: LedgePill-windows-x64
+          path: dist/windows/LedgePill.exe
 
   macos:
     runs-on: macos-latest
@@ -104,8 +104,8 @@ jobs:
         run: cd macos && ./make-app.sh
       - uses: actions/upload-artifact@v4
         with:
-          name: LostIsland-macos
-          path: macos/LostIsland-macos.zip
+          name: LedgePill-macos
+          path: macos/LedgePill-macos.zip
 
   android:
     runs-on: ubuntu-latest
@@ -132,7 +132,7 @@ jobs:
             echo "Configure Android signing secrets before creating a release tag." >&2
             exit 1
           fi
-          keystore="$RUNNER_TEMP/lost-island-upload-key.jks"
+          keystore="$RUNNER_TEMP/ledge-pill-upload-key.jks"
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore"
           {
             echo "ANDROID_KEYSTORE_PATH=$keystore"
@@ -144,7 +144,7 @@ jobs:
         run: cd android && gradle assembleRelease
       - uses: actions/upload-artifact@v4
         with:
-          name: LostIsland-android
+          name: LedgePill-android
           path: android/app/build/outputs/apk/release/app-release.apk
 
   release:
@@ -166,18 +166,18 @@ jobs:
         run: |
           tag="${GITHUB_REF_NAME}"
           assets=(
-            artifacts/lost-island-deb/*.deb
-            artifacts/lost-island-rpm/*.rpm
-            artifacts/LostIsland-windows-x64/LostIsland.exe
-            artifacts/LostIsland-macos/LostIsland-macos.zip
-            artifacts/LostIsland-android/app-release.apk
+            artifacts/ledge-pill-deb/*.deb
+            artifacts/ledge-pill-rpm/*.rpm
+            artifacts/LedgePill-windows-x64/LedgePill.exe
+            artifacts/LedgePill-macos/LedgePill-macos.zip
+            artifacts/LedgePill-android/app-release.apk
           )
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$tag" --repo "$GITHUB_REPOSITORY" --clobber "${assets[@]}"
           else
             gh release create "$tag" \
               --repo "$GITHUB_REPOSITORY" \
-              --title "Lost Island ${tag}" \
+              --title "LedgePill ${tag}" \
               --generate-notes \
               --verify-tag \
               "${assets[@]}"

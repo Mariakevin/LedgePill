@@ -2,13 +2,13 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-BIN=.build/release/LostIsland
+BIN=.build/release/LedgePill
 [[ -x "$BIN" ]] || { echo "build first: swift build -c release" >&2; exit 1; }
 
-APP=LostIsland.app
-rm -rf "$APP" LostIsland-macos.zip
+APP=LedgePill.app
+rm -rf "$APP" LedgePill-macos.zip
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN" "$APP/Contents/MacOS/LostIsland"
+cp "$BIN" "$APP/Contents/MacOS/LedgePill"
 
 cat > "$APP/Contents/Info.plist" <<'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -16,28 +16,28 @@ cat > "$APP/Contents/Info.plist" <<'EOF'
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>it.zorn.LostIsland</string>
+	<string>it.zorn.LedgePill</string>
 	<key>CFBundleName</key>
-	<string>Lost Island</string>
+	<string>LedgePill</string>
 	<key>CFBundleExecutable</key>
-	<string>LostIsland</string>
+	<string>LedgePill</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.8.0</string>
+	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
-	<string>1.8.0</string>
+	<string>1.0.0</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>13.0</string>
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>Lost Island controls your music player.</string>
+	<string>LedgePill controls your music player.</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 </dict>
 </plist>
 EOF
 
-ditto -c -k --keepParent "$APP" LostIsland-macos.zip
-echo "LostIsland-macos.zip"
+ditto -c -k --keepParent "$APP" LedgePill-macos.zip
+echo "LedgePill-macos.zip"

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=LedgePill
+GenericName=Dynamic Island
+Comment=A Dynamic Island for your Linux desktop
+Exec=ledge-pill
+Icon=ledge-pill
+Terminal=false
+Categories=Utility;
+Keywords=island;notch;widget;media;osd;
+X-GNOME-UsesNotifications=true
+StartupNotify=false

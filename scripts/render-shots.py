@@ -24,14 +24,14 @@ from gi.repository import Gdk, GLib, Gtk
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from lostisland import config
-from lostisland.services.weather import WeatherService
-from lostisland.ui.expanded import Expanded
-from lostisland.ui.peek import Peek
-from lostisland.ui.pill import Pill
+from ledgepill import config
+from ledgepill.services.weather import WeatherService
+from ledgepill.ui.expanded import Expanded
+from ledgepill.ui.peek import Peek
+from ledgepill.ui.pill import Pill
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else "docs"
-ART = "/tmp/lost-island-shot-art.png"
+ART = "/tmp/ledge-pill-shot-art.png"
 CFG = dict(config.DEFAULTS)
 
 TRACK = {
@@ -97,7 +97,7 @@ def paint_art():
 def load_css():
     provider = Gtk.CssProvider()
     css_path = os.path.join(
-        os.path.dirname(__file__), "..", "lostisland", "ui", "style.css"
+        os.path.dirname(__file__), "..", "ledgepill", "ui", "style.css"
     )
     with open(css_path) as f:
         provider.load_from_string(
@@ -244,7 +244,7 @@ def main():
     gi.require_version("Adw", "1")
     from gi.repository import Adw
 
-    from lostisland.ui.settings import SettingsWindow
+    from ledgepill.ui.settings import SettingsWindow
 
     Adw.init()
     Adw.StyleManager.get_default().set_color_scheme(Adw.ColorScheme.FORCE_DARK)

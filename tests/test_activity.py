@@ -5,8 +5,8 @@ import gi
 gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
 
-from lostisland.ui.activity import Activity, ActivityQueue
-from lostisland.ui.island import Island
+from ledgepill.ui.activity import Activity, ActivityQueue
+from ledgepill.ui.island import Island
 
 
 def activity(priority=0, key=None):

@@ -1,6 +1,6 @@
 import unittest
 
-from lostisland.ui.settings import SettingsWindow
+from ledgepill.ui.settings import SettingsWindow
 
 
 class SettingsFaceTest(unittest.TestCase):

@@ -4,7 +4,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
-namespace LostIsland;
+namespace LedgePill;
 
 public partial class MainWindow : Window
 {

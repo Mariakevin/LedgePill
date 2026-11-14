@@ -3,8 +3,8 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lost-island"
-version = "1.8.0"
+name = "ledge-pill"
+version = "1.0.0"
 description = "A Dynamic Island for your Linux desktop — fluid, native, and light on your battery"
 readme = "README.md"
 license = { text = "MIT" }
@@ -13,13 +13,13 @@ requires-python = ">=3.11"
 dependencies = ["PyGObject>=3.46"]
 
 [project.urls]
-Homepage = "https://github.com/Mariakevin/lost-island-next"
+Homepage = "https://github.com/Mariakevin/ledge-pill-next"
 
 [project.scripts]
-lost-island = "lostisland.app:main"
+ledge-pill = "ledgepill.app:main"
 
 [tool.setuptools.packages.find]
-include = ["lostisland*"]
+include = ["ledgepill*"]
 
 [tool.setuptools.package-data]
-"lostisland.ui" = ["*.css", "*.svg"]
+"ledgepill.ui" = ["*.css", "*.svg"]

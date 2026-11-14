@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace LostIsland;
+namespace LedgePill;
 
 public partial class App : Application
 {

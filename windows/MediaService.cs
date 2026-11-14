@@ -4,7 +4,7 @@ using System.Windows.Threading;
 using Windows.Media.Control;
 using Windows.Storage.Streams;
 
-namespace LostIsland;
+namespace LedgePill;
 
 // Wraps the Global System Media Transport Controls — the same source that
 // feeds the Windows volume flyout, so anything with media keys shows up.

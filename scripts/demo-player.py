@@ -18,7 +18,7 @@ TRACK = {
     "length": 214 * 1_000_000,
 }
 
-ART = "/tmp/lost-island-demo-art.png"
+ART = "/tmp/ledge-pill-demo-art.png"
 
 NODE = """
 <node>
@@ -88,7 +88,7 @@ class Demo:
         return GLib.Variant(
             "a{sv}",
             {
-                "mpris:trackid": GLib.Variant("o", "/org/lostisland/demo/track/1"),
+                "mpris:trackid": GLib.Variant("o", "/org/ledgepill/demo/track/1"),
                 "xesam:title": GLib.Variant("s", TRACK["title"]),
                 "xesam:artist": GLib.Variant("as", [TRACK["artist"]]),
                 "xesam:album": GLib.Variant("s", TRACK["album"]),

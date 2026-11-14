@@ -1,4 +1,4 @@
-# Publishing Lost Island on Google Play
+# Publishing LedgePill on Google Play
 
 What it actually takes, reviewed 2026-11-12.
 
@@ -40,7 +40,7 @@ What it actually takes, reviewed 2026-11-12.
 
 ## Store listing assets
 
-- App icon 512×512 PNG (render from `data/lost-island.svg`)
+- App icon 512×512 PNG (render from `data/ledge-pill.svg`)
 - Feature graphic 1024×500
 - ≥ 2 phone screenshots (island over home screen, expanded card, settings)
 - Short (80 chars) + full (4000 chars) description — reuse the README copy.
