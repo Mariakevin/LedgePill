@@ -1,195 +1,270 @@
 <p align="center">
-  <img src="data/lost-island.svg" width="110" alt="Lost Island logo">
+  <img src="data/ledge-pill.svg" width="120" alt="LedgePill logo">
 </p>
 
-<h1 align="center">Lost Island</h1>
+<h1 align="center">LedgePill</h1>
 
 <p align="center">
-  <b>A Dynamic Island for your desktop — Linux, Windows, macOS and Android.</b><br>
-  The iPhone's Dynamic Island, rebuilt natively for every screen you own.<br>
-  Fluid, native, and light on your battery.
+  <b>The iPhone's Dynamic Island — rebuilt natively for every screen you own.</b><br>
+  A little black island lives at the top of your screen. It breathes with your music,<br>
+  peeks when something happens, and blooms into a full card when you ask.<br>
+  <i>Fluid. Native. Light on your battery.</i>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Mariakevin/lost-island-next/actions/workflows/build.yml"><img src="https://github.com/Mariakevin/lost-island-next/actions/workflows/build.yml/badge.svg" alt="build"></a>
+  <a href="https://github.com/Mariakevin/LedgePill/actions/workflows/build.yml"><img src="https://github.com/Mariakevin/LedgePill/actions/workflows/build.yml/badge.svg" alt="build"></a>
+  <img src="https://img.shields.io/badge/version-1.0.0-ff9f0a.svg" alt="version">
   <img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="MIT">
   <img src="https://img.shields.io/badge/GTK-4-blue.svg" alt="GTK4">
   <img src="https://img.shields.io/badge/platforms-Linux%20%C2%B7%20Windows%20%C2%B7%20macOS%20%C2%B7%20Android-8A2BE2" alt="platforms">
-  <a href="https://github.com/Mariakevin/lost-island-next/stargazers"><img src="https://img.shields.io/github/stars/Mariakevin/lost-island-next?style=social" alt="GitHub stars"></a>
+  <a href="https://github.com/Mariakevin/LedgePill/stargazers"><img src="https://img.shields.io/github/stars/Mariakevin/LedgePill?style=social" alt="GitHub stars"></a>
 </p>
 
 <p align="center">
-  <img src="docs/demo.gif" width="640" alt="Lost Island in motion">
+  <img src="docs/demo.gif" width="640" alt="LedgePill in motion">
 </p>
 
 <p align="center">
   <b><a href="https://marcozorn.github.io/lost-island/">▶ Play with the interactive demo in your browser</a></b>
 </p>
 
-A little black island lives at the top of your screen — on your bar, not
-under it. Most of the time it's a quiet pill with the clock. Play some music
-and it picks up the track; change the volume and it becomes an OSD; plug in
-the charger, connect your earbuds, switch Wi-Fi, or get a notification and it
-peeks to tell you — then melts back into a pill. Click it and it blooms into
-a full card: album art, seek bar, media controls, quick toggles, battery
-ring, volume, weather, a pomodoro timer, and live system stats.
+---
 
-| | |
-|:---:|:---:|
-| ![Idle pill](docs/shot-pill.png) | ![Music pill](docs/shot-music-pill.png) |
-| *idle — just the time* | *now playing, with live EQ* |
-| ![Volume peek](docs/shot-volume.png) | ![Notification peek](docs/shot-notification.png) |
-| *volume OSD peek* | *notification peek* |
-| ![Expanded card](docs/shot-expanded.png) | ![Settings](docs/shot-settings.png) |
-| *the full card* | *native settings* |
+## Table of contents
 
-## Features
+- [What is LedgePill?](#what-is-ledgepill)
+- [Feature tour](#feature-tour)
+- [Design system](#design-system)
+- [Light on your battery](#light-on-your-battery--by-architecture)
+- [Architecture](#architecture)
+- [Install](#install)
+- [Configuration](#configuration)
+- [CLI](#cli)
+- [Hacking](#hacking)
+- [FAQ](#faq)
+- [License](#license)
 
-- **Music** — every MPRIS player (Spotify, Firefox, mpv, Elisa, …): album
-  art, title/artist/album, seek bar, prev/play/next. The island elects the
-  *active* player, so a paused podcast never hides the song you started.
-  With [cava](https://github.com/karlstav/cava) installed, the five EQ bars
-  follow the actual audio spectrum, beat by beat — and the cava process only
-  exists while music is playing and the bars are on screen.
-- **Pill faces** — the collapsed island is a deck of faces you flip
-  through with a click or a horizontal swipe: automatic (music/clock),
-  clock + battery, **live synced lyrics**, song title (never the artist),
-  album art + EQ, clock only, battery only, weather, and bluetooth. Pick
-  which faces are in the cycle from Settings. Right-click opens the full card;
-  click empty card space (or drift away) to close it.
-- **Lyrics** — the lyrics face shows the current line, synced to playback,
-  fetched once per song from lrclib.net.
-- **Volume OSD** — the pill widens into a level bar the moment you touch
-  your volume keys.
-- **Audio status** — the expanded card shows current volume and microphone
-  mute state. Use your keyboard controls to change them.
-- **Brightness status** — the expanded card and OSD show the current display
-  brightness. Use your keyboard controls to change it.
-- **Battery** — charge ring in the expanded card, peeks on plug/unplug.
-- **Notifications** — mirrored passively from the session bus; your normal
-  notification daemon keeps working untouched. The app can suppress peeks
-  with Do Not Disturb and filter named applications. Up to 50 notifications
-  are persisted locally with owner-only file permissions; Clear removes them.
-- **Webhook messages** — authenticated local scripts can send a short message
-  to the island through a loopback-only HTTP endpoint. Its bearer token is
-  stored with owner-only permissions in
-  `$XDG_DATA_HOME/lost-island/webhook-token` (defaulting to
-  `~/.local/share/lost-island/webhook-token`).
-- **Network** — connectivity chip and peeks on Wi-Fi/Ethernet changes.
-- **Bluetooth** — connected device chip with battery level, peeks on
-  connect/disconnect.
-- **Weather** — current conditions in the card, fetched only when you open
-  it (and at most every 30 minutes).
-- **Information feeds** — optional RSS/Atom and JSON endpoints appear in the
-  expanded card. Configure sources in `~/.config/lost-island/config.json`; they
-  refresh every five minutes while the card is open.
-- **Mute indicators** — the app reads system volume and microphone mute state
-  for its on-screen indicators. The desktop audio system and kernel handle the
-  physical mute LEDs.
-- **Quick toggles** — caffeine (blocks sleep via `systemd-inhibit`) and a
-  screenshot shortcut.
-- **System stats** — CPU and RAM readout, sampled only while the card is
-  open.
-- **AI assistant** — local Ollama or LM Studio, with optional Claude, Gemini
-  and OpenRouter providers. Local providers use native function calling for
-  device controls; Ollama and LM Studio are discovered independently. System
-  context and device controls are disabled by default; enabling them can share
-  live device context with the selected remote provider.
-- **Developer activity** — the Linux pill reports detected Claude Code,
-  Codex, Aider, OpenCode, and Goose processes, along with builds and package
-  installs. Detection is limited to processes owned by the current user and
-  shows tool names without retaining or displaying prompts or command text.
-- **Pomodoro** — a 25-minute focus timer; while it runs, the countdown rides
-  along in the pill. Optional automatic cycles add five-minute breaks and a
-  fifteen-minute break after every fourth focus round.
-- **Tasks** — create and complete tasks in the expanded card; the task list
-  persists between launches in the user's data directory.
-- **Fluid morphs** — one surface that interpolates between pill, peek and
-  card, with hover growth, exactly like the one on the phone.
-- **Settings** — every option below lives in a native preferences window
-  (the gear in the card, or `lost-island --settings`) and applies instantly.
+---
+
+## What is LedgePill?
+
+LedgePill is a **native, cross-platform Dynamic Island** — the small, animated pill that lives at the top of your screen and reacts to everything: music, volume, battery, notifications, network, Bluetooth, weather, your Pomodoro timer, even your AI assistant.
+
+It is **one open-source project** with the same design language on every platform, built with **zero web runtimes** — GTK4 on Linux, WPF on Windows, AppKit on macOS, Kotlin on Android. No Electron. No web views. Just native widgets and a shared aesthetic.
+
+> Most of the time it's a quiet pill with the clock. Play some music and it picks up the track. Touch your volume keys and it becomes an OSD. Plug in the charger, connect your earbuds, switch Wi-Fi, or get a notification and it **peeks** to tell you — then melts back into a pill. Click it and it **blooms** into a full card.
 
 <p align="center">
-  <img src="docs/shot-settings.png" width="420" alt="Settings window">
+  <img src="docs/shot-pill.png" width="260" alt="Idle pill">
+  <img src="docs/shot-music-pill.png" width="260" alt="Music pill">
+  <img src="docs/shot-volume.png" width="260" alt="Volume peek">
 </p>
+<p align="center">
+  <img src="docs/shot-notification.png" width="260" alt="Notification peek">
+  <img src="docs/shot-expanded.png" width="260" alt="Expanded card">
+  <img src="docs/shot-settings.png" width="260" alt="Settings">
+</p>
+
+---
+
+## Feature tour
+
+### 🎵 Media
+- **Every MPRIS player** (Spotify, Firefox, mpv, Elisa, …): album art, title/artist/album, seek bar, prev/play/next.
+- The island **elects the active player**, so a paused podcast never hides the song you started.
+- With [cava](https://github.com/karlstav/cava) installed, the five EQ bars follow the **actual audio spectrum**, beat by beat — and the cava process only exists while music plays and the bars are on screen.
+- **Synced lyrics** fetched once per song from lrclib.net, riding along in the pill.
+
+### 🧩 Pill faces — a deck you flip through
+The collapsed island is a **deck of faces** cycled by click or horizontal swipe:
+`auto` · `status` · `lyrics` · `title` · `compact` · `clock` · `battery` · `weather` · `bluetooth` · `ollama` · `mascot`.
+
+Pick which faces are in the cycle from Settings. Right-click opens the full card; click empty card space (or drift away) to close it.
+
+### 🐾 Mascot eyes
+A clock face with **cursor-tracking animated eyes** — normal, sleepy, working (AI busy), or attention. The eyes follow your pointer across the whole screen via a global cursor watcher.
+
+### 🔊 Volume & brightness OSD
+The pill widens into a level bar the moment you touch your volume or brightness keys. Expanded card shows current volume, mic mute state, and display brightness.
+
+### 🔋 Battery
+Charge ring in the expanded card; peeks on plug/unplug.
+
+### 🔔 Notifications
+- Mirrored **passively** from the session bus — your normal notification daemon keeps working untouched.
+- Suppress peeks with **Do Not Disturb**; filter named applications.
+- Up to 50 notifications persisted locally with **owner-only file permissions**; *Clear* removes them.
+
+### 📡 Webhook messages
+Authenticated local scripts send a short message to the island through a **loopback-only HTTP endpoint**. Bearer token stored with owner-only permissions in `$XDG_DATA_HOME/ledge-pill/webhook-token`.
+
+### 🌐 Network & Bluetooth
+- Connectivity chip + peeks on Wi-Fi/Ethernet changes.
+- Connected Bluetooth device chip with **battery level**, peeks on connect/disconnect.
+
+### 🌤 Weather
+Current conditions in the card, fetched only when you open it (and at most every 30 minutes).
+
+### 📰 Information feeds
+Optional **RSS/Atom and JSON endpoints** appear in the expanded card. Configure sources in `~/.config/ledge-pill/config.json`; they refresh every five minutes while the card is open.
+
+### 🔇 Mute indicators
+Reads system volume and microphone mute state for on-screen indicators.
+
+### ⚡ Quick toggles
+- **Caffeine** — blocks sleep via `systemd-inhibit`.
+- **Screenshot** shortcut.
+
+### 📊 System stats
+CPU and RAM readout, sampled **only while the card is open**.
+
+### 🤖 AI assistant
+Local **Ollama** or **LM Studio**, with optional **Claude, Gemini, OpenRouter**. Local providers use native function calling for device controls; Ollama and LM Studio are discovered independently. System context and device controls are **disabled by default**; enabling them can share live device context with the selected remote provider. The assistant exposes only currently available LedgePill actions; shutdown, reboot, suspend, lock, and ending an app still require confirmation.
+
+### 👨‍💻 Developer activity
+Reports detected **Claude Code, Codex, Aider, OpenCode, and Goose** processes, along with builds and package installs. Detection is limited to processes owned by the current user and shows tool names **without retaining or displaying prompts or command text**.
+
+### 🍅 Pomodoro & tasks
+- A 25-minute focus timer; while it runs, the countdown rides along in the pill. Optional automatic cycles add 5-minute breaks and a 15-minute break after every fourth focus round.
+- Create and complete tasks in the expanded card; the task list persists between launches.
+
+### 💧 Fluid morphs
+One surface that interpolates between pill, peek and card, with hover growth — exactly like the one on the phone.
+
+### ⚙️ Settings
+Every option lives in a **native preferences window** (the gear in the card, or `ledge-pill --settings`) and applies instantly.
+
+---
+
+## Design system
+
+LedgePill ships a small but deliberate visual language:
+
+| Token | Values |
+|---|---|
+| **Themes** | `obsidian` · `liquid-glass` · `frosted` · `midnight` · `amber` |
+| **Styles** | `pill` · `dashboard` · `vertical` · `waterdrop` · `notch` |
+| **Animations** | `fluid` · `snappy` · `gentle` |
+| **Accent modes** | `manual` · `auto` · `system` · `artwork` |
+| **Fullscreen behavior** | `ignore` · `hide` · `compact` |
+
+Accent color can be fixed, derived from the playing artwork, or pulled from the system. Fullscreen windows can be ignored, hidden-behind, or compacted automatically.
+
+---
 
 ## Light on your battery — by architecture
 
-Most service updates are event-driven over DBus. Desktop activity and privacy
-indicators use short, bounded checks; CPU and RAM sampling starts only while
-the expanded card is open:
+Most service updates are **event-driven over DBus**. Desktop activity and privacy indicators use short, bounded checks; CPU and RAM sampling starts only while the expanded card is open:
 
-- Idle, the process wakes **once per minute** to redraw the clock (and the
-  wakeup is aligned to the minute, not drifting).
-- The EQ bars animate only while music plays *and* the pill is on screen;
-  the seek bar ticks at 1 Hz only while the card is open.
-- Volume events come from a sleeping `pactl subscribe` pipe; battery,
-  network, media and notifications are pure DBus signals.
-- Desktop state is checked every three seconds and privacy indicators every
-  four seconds while their modules are enabled.
-- Clicks outside the island cost nothing: the layer surface hugs the island
-  exactly, so the compositor never even wakes the app.
+- Idle, the process wakes **once per minute** to redraw the clock (aligned to the minute, not drifting).
+- EQ bars animate only while music plays *and* the pill is on screen; the seek bar ticks at 1 Hz only while the card is open.
+- Volume events come from a sleeping `pactl subscribe` pipe; battery, network, media and notifications are pure DBus signals.
+- Desktop state is checked every 3 seconds and privacy indicators every 4 seconds while their modules are enabled.
+- Clicks outside the island cost nothing: the layer surface hugs the island exactly, so the compositor never even wakes the app.
 
 Measured on the machine it was built on (Arch, KDE Plasma / Wayland):
-**≈0.2 % CPU when idle** and **≈110 MB PSS** (most of it shared GTK pages).
+**≈ 0.2 % CPU when idle** and **≈ 110 MB PSS** (most of it shared GTK pages).
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph UI["GTK4 UI (layer-shell)"]
+        Pill[Pill]
+        Peek[Peek]
+        Card[Expanded card]
+        Settings[Preferences]
+    end
+    subgraph Services["Event-driven services"]
+        Mpris[MPRIS]
+        Audio[Audio / Volume]
+        Power[UPower]
+        Net[NetworkManager]
+        BT[BlueZ]
+        Notify[Notifications]
+        Sys[System stats]
+        AI[AI assistant]
+    end
+    subgraph Backends["Platform backends"]
+        Layer[gtk4-layer-shell]
+        DBus[D-Bus]
+        Pactl[pactl subscribe]
+    end
+    Services --> DBus
+    Audio --> Pactl
+    UI --> Layer
+    Mpris --> UI
+    Audio --> UI
+    Power --> UI
+    Net --> UI
+    BT --> UI
+    Notify --> UI
+```
+
+Single instance. Layer surface anchors to the top edge and hugs the island exactly, so input outside it never wakes the process.
+
+---
 
 ## Install
 
 ### Arch Linux
 
 ```bash
-git clone https://github.com/Mariakevin/lost-island-next
-cd lost-island-next/packaging && makepkg -si
+git clone https://github.com/Mariakevin/LedgePill
+cd LedgePill/packaging && makepkg -si
 ```
 
 ### Debian 12+ / Ubuntu 24.04+
 
-Grab the `.deb` from [Releases](https://github.com/Mariakevin/lost-island-next/releases), or:
+Grab the `.deb` from [Releases](https://github.com/Mariakevin/LedgePill/releases), or:
 
 ```bash
-sudo apt install ./lost-island_*.deb
+sudo apt install ./ledge-pill_*.deb
 ```
 
-APT installs the package dependencies automatically. Python 3.11 or newer is
-required. `libgtk4-layer-shell0` is optional and is not available in every
-Ubuntu release; without it, the app uses a floating window instead of a
-compositor layer surface.
+APT installs package dependencies automatically. Python 3.11+ required.
+`libgtk4-layer-shell0` is optional and not available in every Ubuntu release;
+without it, the app uses a floating window instead of a compositor layer surface.
 
 ### Fedora
 
 ```bash
-sudo dnf install lost-island-*.rpm   # from Releases
+sudo dnf install ledge-pill-*.rpm   # from Releases
 ```
 
 ### Any distro
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Mariakevin/lost-island-next/main/packaging/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/Mariakevin/LedgePill/main/packaging/install.sh | sudo bash
 ```
 
 ### Start it
 
 ```bash
-lost-island                                        # try it
-systemctl --user enable --now lost-island.service  # keep it
+ledge-pill                                        # try it
+systemctl --user enable --now ledge-pill.service  # keep it
 ```
 
-Works natively on Wayland compositors that speak layer-shell: **KDE Plasma,
-Hyprland, Sway, river, Wayfire** and friends. On GNOME Wayland (no
-layer-shell for apps) it falls back to a plain floating window.
+Works natively on Wayland compositors that speak layer-shell:
+**KDE Plasma, Hyprland, Sway, river, Wayfire** and friends.
+On GNOME Wayland (no layer-shell for apps) it falls back to a plain floating window.
+
+---
 
 ## Windows, macOS, Android
 
 Native companion apps live in this repo — same island, same design language,
-built per-platform with zero web runtimes. They cover the core feature set
+built per-platform with **zero web runtimes**. They cover the core feature set
 (clock + media) and are **beta**: CI-built, less battle-tested than the
 Linux flagship.
 
 | Platform | Stack | Media source | Get it |
 |---|---|---|---|
-| Windows 10/11 (x64) | WPF (.NET 8) | system media session (SMTC) | `LostIsland.exe` from [Releases](https://github.com/Mariakevin/lost-island-next/releases) |
-| macOS 13+ | AppKit (Swift) | Spotify / Apple Music | `LostIsland-macos.zip` from [Releases](https://github.com/Mariakevin/lost-island-next/releases) |
-| Android 8+ | Kotlin | any media session | `app-release.apk` from [Releases](https://github.com/Mariakevin/lost-island-next/releases) |
+| Windows 10/11 (x64) | WPF (.NET 8) | system media session (SMTC) | `LedgePill.exe` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
+| macOS 13+ | AppKit (Swift) | Spotify / Apple Music | `LedgePill-macos.zip` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
+| Android 8+ | Kotlin | any media session | `app-release.apk` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
 
 The Android app hugs the display cutout like the real thing, cycles pill
 faces on tap/swipe (lyrics included), and has its own settings screen.
@@ -206,10 +281,12 @@ a SmartScreen warning; macOS requires the first-launch confirmation described
 in its build notes. Download binaries only from the project's official
 Releases page.
 
+---
+
 ## Configuration
 
 Everything is editable from the settings window; the JSON at
-`~/.config/lost-island/config.json` is the backing store:
+`~/.config/ledge-pill/config.json` is the backing store:
 
 | Key | Default | Meaning |
 |---|---|---|
@@ -239,7 +316,7 @@ Everything is editable from the settings window; the JSON at
 
 Local model servers default to Ollama on `127.0.0.1:11434` and LM Studio on
 `127.0.0.1:1234`. Set `OLLAMA_HOST` or `LMSTUDIO_HOST` to use another local
-address. The assistant exposes only currently available Lost Island actions;
+address. The assistant exposes only currently available LedgePill actions;
 shutdown, reboot, suspend, lock, and ending an app still require confirmation.
 
 Example feed configuration:
@@ -263,24 +340,30 @@ launch:
 
 ```bash
 DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
-TOKEN="$(cat "$DATA_HOME/lost-island/webhook-token")"
-curl --fail --silent -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"app":"Build","title":"Build finished","body":"All checks passed."}' http://127.0.0.1:17334/notify
+TOKEN="$(cat "$DATA_HOME/ledge-pill/webhook-token")"
+curl --fail --silent -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"app":"Build","title":"Build finished","body":"All checks passed."}' \
+  http://127.0.0.1:17334/notify
 ```
+
+---
 
 ## CLI
 
 ```
-lost-island             start (single instance)
-lost-island --toggle    expand / collapse a running island
-lost-island --settings  open the settings window
-lost-island --quit      stop it
+ledge-pill             start (single instance)
+ledge-pill --toggle    expand / collapse a running island
+ledge-pill --settings  open the settings window
+ledge-pill --quit      stop it
 ```
+
+---
 
 ## Hacking
 
 ```bash
-git clone https://github.com/Mariakevin/lost-island-next && cd lost-island-next
-python -m lostisland                 # run from the tree
+git clone https://github.com/Mariakevin/LedgePill && cd LedgePill
+python -m ledgepill                 # run from the tree
 python scripts/demo-player.py        # fake MPRIS player to exercise the UI
 python -m unittest discover tests    # tests
 ```
@@ -290,6 +373,8 @@ CSS, rendered headless: `scripts/render-shots.py`. The demo GIF is recorded
 the same way (`scripts/record-demo.py`), and the browser demo lives in
 `docs/index.html`.
 
+---
+
 ## FAQ
 
 **Can I get the iPhone Dynamic Island on Android?**
@@ -297,14 +382,14 @@ Yes — that's the Android app in this repo: a floating island pill that hugs
 the punch-hole camera, shows your music with animated EQ bars and synced
 lyrics, mirrors notifications, and expands into a media card. It works on
 any Android 8+ phone; no root, no launcher change. Grab the APK from
-[Releases](https://github.com/Mariakevin/lost-island-next/releases).
+[Releases](https://github.com/Mariakevin/LedgePill/releases).
 
 **Is there a Dynamic Island for Linux?**
 That's the flagship here: a native GTK4 + layer-shell island for KDE
 Plasma, Hyprland, Sway and any wlr compositor — Apple-style pill morphs,
 MPRIS media controls, volume OSD, notification peeks, all measured at
 ~0.2 % idle CPU. Arch, Debian/Ubuntu and Fedora packages are in
-[Releases](https://github.com/Mariakevin/lost-island-next/releases).
+[Releases](https://github.com/Mariakevin/LedgePill/releases).
 
 **Does it work on Windows 11 or macOS?**
 Yes — native companions (WPF on Windows, AppKit on macOS) with the same
@@ -312,7 +397,7 @@ look: clock pill, now-playing with album art, media controls. Both are
 prebuilt on every release.
 
 **How is this different from the notch / punch hole "island" apps?**
-Lost Island is one open-source project with the same design language on
+LedgePill is one open-source project with the same design language on
 every platform, it's fully native (no Electron, no web views), and the
 Linux version uses DBus notifications for most system events, with small
 periodic checks for desktop activity and privacy indicators. CPU and RAM
@@ -321,7 +406,7 @@ sampling runs only while the expanded card is open.
 ---
 
 <p align="center">
-  <b>If Lost Island lives on your screen, <a href="https://github.com/Mariakevin/lost-island-next">leave it a ⭐</a> — it's how other people find it.</b>
+  <b>If LedgePill lives on your screen, <a href="https://github.com/Mariakevin/LedgePill">leave it a ⭐</a> — it's how other people find it.</b>
 </p>
 
 ## License
