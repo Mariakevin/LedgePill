@@ -8,24 +8,41 @@
 </p>
 
 <p align="center">
+  Linux &nbsp;·&nbsp; Windows &nbsp;·&nbsp; macOS &nbsp;·&nbsp; Android &nbsp;&nbsp;|&nbsp;&nbsp; v1.0.0 &nbsp;·&nbsp; MIT
+</p>
+
+<p align="center">
   <b><a href="https://marcozorn.github.io/lost-island/">▶ Play with the interactive demo in your browser</a></b>
 </p>
 
 ---
 
-## Table of contents
+## Quick start
 
-- [What is LedgePill?](#what-is-ledgepill)
-- [Feature tour](#feature-tour)
-- [Design system](#design-system)
-- [Light on your battery](#light-on-your-battery--by-architecture)
-- [Architecture](#architecture)
-- [Install](#install)
-- [Configuration](#configuration)
-- [CLI](#cli)
-- [Hacking](#hacking)
-- [FAQ](#faq)
-- [License](#license)
+Linux, one line:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Mariakevin/LedgePill/main/packaging/install.sh | sudo bash
+ledge-pill                                        # run it
+systemctl --user enable --now ledge-pill.service  # keep it
+```
+
+Package-manager installs for Arch, Debian/Ubuntu and Fedora, plus the Windows,
+macOS and Android builds, are in [Install](#install) and
+[Windows, macOS, Android](#windows-macos-android).
+
+---
+
+## Contents
+
+| Get started | Go deeper |
+|---|---|
+| [What is LedgePill?](#what-is-ledgepill) | [Light on your battery](#light-on-your-battery--by-architecture) |
+| [Feature tour](#feature-tour) | [Architecture](#architecture) |
+| [Install](#install) | [Configuration](#configuration) |
+| [Windows, macOS, Android](#windows-macos-android) | [CLI](#cli) |
+| [FAQ](#faq) | [Hacking](#hacking) |
+| [License](#license) | [Design system](#design-system) |
 
 ---
 
@@ -36,6 +53,17 @@ LedgePill is a **native, cross-platform Dynamic Island** — the small, animated
 It is **one open-source project** with the same design language on every platform, built with **zero web runtimes** — GTK4 on Linux, WPF on Windows, AppKit on macOS, Kotlin on Android. No Electron. No web views. Just native widgets and a shared aesthetic.
 
 > Most of the time it's a quiet pill with the clock. Play some music and it picks up the track. Touch your volume keys and it becomes an OSD. Plug in the charger, connect your earbuds, switch Wi-Fi, or get a notification and it **peeks** to tell you — then melts back into a pill. Click it and it **blooms** into a full card.
+
+### At a glance
+
+| | |
+|---|---|
+| **What it is** | A Dynamic Island for your desktop — pill, peeks and a full card |
+| **Platforms** | Linux (flagship) · Windows · macOS · Android (beta) |
+| **Built with** | GTK4 · WPF (.NET 8) · AppKit (Swift) · Kotlin — no Electron, no web views |
+| **Footprint** | ≈ 0.2 % idle CPU, ≈ 110 MB PSS on KDE Plasma / Wayland |
+| **Install** | Arch, Debian/Ubuntu, Fedora, or one script |
+| **License** | MIT |
 
 ---
 
@@ -56,11 +84,21 @@ Pick which faces are in the cycle from Settings. Right-click opens the full card
 ### 🐾 Mascot eyes
 A clock face with **cursor-tracking animated eyes** — normal, sleepy, working (AI busy), or attention. The eyes follow your pointer across the whole screen via a global cursor watcher.
 
+### 💧 Fluid morphs
+One surface that interpolates between pill, peek and card, with hover growth — exactly like the one on the phone.
+
 ### 🔊 Volume & brightness OSD
 The pill widens into a level bar the moment you touch your volume or brightness keys. Expanded card shows current volume, mic mute state, and display brightness.
 
 ### 🔋 Battery
 Charge ring in the expanded card; peeks on plug/unplug.
+
+### 🌐 Network & Bluetooth
+- Connectivity chip + peeks on Wi-Fi/Ethernet changes.
+- Connected Bluetooth device chip with **battery level**, peeks on connect/disconnect.
+
+### 🌤 Weather
+Current conditions in the card, fetched only when you open it (and at most every 30 minutes).
 
 ### 🔔 Notifications
 - Mirrored **passively** from the session bus — your normal notification daemon keeps working untouched.
@@ -69,13 +107,6 @@ Charge ring in the expanded card; peeks on plug/unplug.
 
 ### 📡 Webhook messages
 Authenticated local scripts send a short message to the island through a **loopback-only HTTP endpoint**. Bearer token stored with owner-only permissions in `$XDG_DATA_HOME/ledge-pill/webhook-token`.
-
-### 🌐 Network & Bluetooth
-- Connectivity chip + peeks on Wi-Fi/Ethernet changes.
-- Connected Bluetooth device chip with **battery level**, peeks on connect/disconnect.
-
-### 🌤 Weather
-Current conditions in the card, fetched only when you open it (and at most every 30 minutes).
 
 ### 📰 Information feeds
 Optional **RSS/Atom and JSON endpoints** appear in the expanded card. Configure sources in `~/.config/ledge-pill/config.json`; they refresh every five minutes while the card is open.
@@ -99,9 +130,6 @@ Reports detected **Claude Code, Codex, Aider, OpenCode, and Goose** processes, a
 ### 🍅 Pomodoro & tasks
 - A 25-minute focus timer; while it runs, the countdown rides along in the pill. Optional automatic cycles add 5-minute breaks and a 15-minute break after every fourth focus round.
 - Create and complete tasks in the expanded card; the task list persists between launches.
-
-### 💧 Fluid morphs
-One surface that interpolates between pill, peek and card, with hover growth — exactly like the one on the phone.
 
 ### ⚙️ Settings
 Every option lives in a **native preferences window** (the gear in the card, or `ledge-pill --settings`) and applies instantly.
@@ -128,11 +156,14 @@ Accent color can be fixed, derived from the playing artwork, or pulled from the 
 
 Most service updates are **event-driven over DBus**. Desktop activity and privacy indicators use short, bounded checks; CPU and RAM sampling starts only while the expanded card is open:
 
-- Idle, the process wakes **once per minute** to redraw the clock (aligned to the minute, not drifting).
-- EQ bars animate only while music plays *and* the pill is on screen; the seek bar ticks at 1 Hz only while the card is open.
-- Volume events come from a sleeping `pactl subscribe` pipe; battery, network, media and notifications are pure DBus signals.
-- Desktop state is checked every 3 seconds and privacy indicators every 4 seconds while their modules are enabled.
-- Clicks outside the island cost nothing: the layer surface hugs the island exactly, so the compositor never even wakes the app.
+| While | What runs |
+|---|---|
+| **Idle** | One wake per minute, aligned to the minute, to redraw the clock |
+| **Music playing** | EQ bars animate; seek bar ticks at 1 Hz only while the card is open |
+| **Volume changed** | Events from a sleeping `pactl subscribe` pipe |
+| **Anything else** | Battery, network, media and notifications are pure DBus signals |
+| **Their modules on** | Desktop state every 3 s, privacy indicators every 4 s |
+| **Clicks outside** | Nothing — the layer surface hugs the island, so the compositor never wakes the app |
 
 Measured on the machine it was built on (Arch, KDE Plasma / Wayland):
 **≈ 0.2 % CPU when idle** and **≈ 110 MB PSS** (most of it shared GTK pages).
@@ -180,6 +211,14 @@ Single instance. Layer surface anchors to the top edge and hugs the island exact
 ---
 
 ## Install
+
+| Platform | How |
+|---|---|
+| **Arch Linux** | `cd packaging && makepkg -si` |
+| **Debian 12+ / Ubuntu 24.04+** | `.deb` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
+| **Fedora** | `.rpm` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
+| **Any distro** | `packaging/install.sh` |
+| **Windows / macOS / Android** | See [below](#windows-macos-android) |
 
 ### Arch Linux
 
@@ -291,6 +330,8 @@ Local model servers default to Ollama on `127.0.0.1:11434` and LM Studio on
 address. The assistant exposes only currently available LedgePill actions;
 shutdown, reboot, suspend, lock, and ending an app still require confirmation.
 
+### Feeds
+
 Example feed configuration:
 
 ```json
@@ -306,6 +347,8 @@ RSS/Atom sources use their entry title, summary/description and link. JSON
 sources may return an array or an object containing an `items`, `entries`,
 `results` or `data` array; each entry should have `title` (or `name`/`text`)
 and may include `summary`/`description` and `url`/`link`.
+
+### Webhooks
 
 Send a local webhook notification with the private token generated on first
 launch:
@@ -335,12 +378,12 @@ ledge-pill --quit      stop it
 
 ```bash
 git clone https://github.com/Mariakevin/LedgePill && cd LedgePill
-python -m ledgepill                 # run from the tree
+python -m ledgepill                  # run from the tree
 python scripts/demo-player.py        # fake MPRIS player to exercise the UI
 python -m unittest discover tests    # tests
 ```
 
-The README screenshots are generated, not hand-cropped — real widgets, real
+The screenshots in `docs/` are generated, not hand-cropped — real widgets, real
 CSS, rendered headless: `scripts/render-shots.py`. The demo GIF is recorded
 the same way (`scripts/record-demo.py`), and the browser demo lives in
 `docs/index.html`.
@@ -349,26 +392,30 @@ the same way (`scripts/record-demo.py`), and the browser demo lives in
 
 ## FAQ
 
-**Can I get the iPhone Dynamic Island on Android?**
+### Can I get the iPhone Dynamic Island on Android?
+
 Yes — that's the Android app in this repo: a floating island pill that hugs
 the punch-hole camera, shows your music with animated EQ bars and synced
 lyrics, mirrors notifications, and expands into a media card. It works on
 any Android 8+ phone; no root, no launcher change. Grab the APK from
 [Releases](https://github.com/Mariakevin/LedgePill/releases).
 
-**Is there a Dynamic Island for Linux?**
+### Is there a Dynamic Island for Linux?
+
 That's the flagship here: a native GTK4 + layer-shell island for KDE
 Plasma, Hyprland, Sway and any wlr compositor — Apple-style pill morphs,
 MPRIS media controls, volume OSD, notification peeks, all measured at
 ~0.2 % idle CPU. Arch, Debian/Ubuntu and Fedora packages are in
 [Releases](https://github.com/Mariakevin/LedgePill/releases).
 
-**Does it work on Windows 11 or macOS?**
+### Does it work on Windows 11 or macOS?
+
 Yes — native companions (WPF on Windows, AppKit on macOS) with the same
 look: clock pill, now-playing with album art, media controls. Both are
 prebuilt on every release.
 
-**How is this different from the notch / punch hole "island" apps?**
+### How is this different from the notch / punch hole "island" apps?
+
 LedgePill is one open-source project with the same design language on
 every platform, it's fully native (no Electron, no web views), and the
 Linux version uses DBus notifications for most system events, with small
@@ -377,10 +424,19 @@ sampling runs only while the expanded card is open.
 
 ---
 
+## License
+
+[MIT](LICENSE) © Marco Zorn
+
+---
+
 <p align="center">
   <b>If LedgePill lives on your screen, <a href="https://github.com/Mariakevin/LedgePill">leave it a ⭐</a> — it's how other people find it.</b>
 </p>
 
-## License
-
-[MIT](LICENSE) © Marco Zorn
+<p align="center">
+  <a href="#top">Back to top</a> &nbsp;·&nbsp;
+  <a href="https://github.com/Mariakevin/LedgePill/releases">Releases</a> &nbsp;·&nbsp;
+  <a href="https://github.com/Mariakevin/LedgePill/issues">Issues</a> &nbsp;·&nbsp;
+  <a href="https://github.com/Mariakevin/LedgePill">GitHub</a>
+</p>
