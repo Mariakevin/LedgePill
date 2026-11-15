@@ -12,7 +12,6 @@
   /* ------------------------------------------------------------------ demo */
   .demo { padding: 12px 0 8px; }
   .demo-wrap { display: flex; flex-direction: column; align-items: center; padding-top: 8px; }
-  .stage { display: flex; flex-direction: column; align-items: center; }
 
   /* the fake desktop the island hangs in */
   .screen {
@@ -36,6 +35,15 @@
     border-radius: inherit;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
   }
+  .flash {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    background: #fff;
+    pointer-events: none;
+    animation: shutter .35s ease-out forwards;
+  }
+  @keyframes shutter { from { opacity: 1; } to { opacity: 0; } }
   .menubar {
     display: flex;
     align-items: center;
@@ -60,9 +68,12 @@
   .menubar .live .led { background: var(--accent); }
 
   .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
     padding: 16px 0 22px;
     min-height: 210px;
-    justify-content: flex-start;
   }
 
   /* Opens as a card, so the island itself stays unpadded for measurement */
@@ -85,6 +96,9 @@
   #island.expanded { border-radius: 30px; cursor: default; }
   #island:not(.expanded):hover { transform: scale(1.04); }
   #island:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+  @media (prefers-reduced-motion: reduce) {
+    #island { transition: none; }
+  }
   #island > section {
     position: absolute;
     top: 0;
@@ -309,7 +323,7 @@
           <span class="live"><i class="led"></i> live demo</span>
         </div>
         <div class="stage">
-          <div id="island" tabindex="0" role="group" aria-label="LedgePill island — click to flip faces, right-click to open the card">
+          <div id="island" tabindex="0" role="group" aria-label="LedgePill island — click to flip faces, right-click or Enter/Space toggles the card">
             <section id="pill" class="on">
               <div class="art"></div>
               <div class="t" id="ptitle"></div>
@@ -342,15 +356,15 @@
                 <span>3:34</span>
               </div>
               <div class="controls">
-                <button aria-label="Previous track">⏮</button>
+                <button id="prevBtn" aria-label="Previous track">⏮</button>
                 <button class="main" id="playBtn" aria-label="Play or pause">⏸</button>
-                <button aria-label="Next track">⏭</button>
+                <button id="nextBtn" aria-label="Next track">⏭</button>
               </div>
               <div class="toggles">
                 <button id="muteBtn" title="Mute" aria-label="Toggle mute">🔊</button>
                 <button id="micBtn" title="Mic" aria-label="Toggle microphone">🎙</button>
                 <button id="cafBtn" title="Caffeine" aria-label="Toggle caffeine mode">☕</button>
-                <button title="Screenshot" aria-label="Take a screenshot">📷</button>
+                <button id="shotBtn" title="Screenshot" aria-label="Take a screenshot">📷</button>
               </div>
               <div class="tiles">
                 <div class="tile">
@@ -370,7 +384,7 @@
             </section>
           </div>
         </div>
-        <p class="caption">click to flip faces · swipe to switch · right-click opens the card</p>
+        <p class="caption">click to flip faces · swipe to switch · right-click opens the card · Enter opens the card</p>
       </div>
 
       <div class="deck">
@@ -420,7 +434,10 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
 
 function fit(name) {
   const el = secs[name];
-  for (const k in secs) secs[k].classList.toggle('on', k === name);
+  for (const k in secs) {
+    secs[k].classList.toggle('on', k === name);
+    secs[k].inert = k !== name;   // closed sections leave the tab order
+  }
   island.classList.toggle('expanded', name === 'card');
   island.style.width = el.scrollWidth + 'px';
   island.style.height = el.scrollHeight + 'px';
@@ -437,15 +454,38 @@ const pillArt = secs.pill.querySelector('.art'),
       pbat = document.getElementById('pbat');
 const FACES = ['auto', 'status', 'lyrics', 'title', 'clock'];
 let faceIdx = 0;
-const LYRICS = [
-  [0, '♪'], [42, 'Taillights paint the dashboard gold'],
-  [48, 'Half a tank and nowhere to be'], [55, 'You said turn the radio up'],
-  [62, 'So I let the night drive me'], [70, 'Halfway to nowhere, right on time'],
-  [78, 'Every wrong turn felt like mine'], [86, '♪'],
+
+/* three fake tracks — each brings its own lyrics and album-art gradient */
+const TRACKS = [
+  { title: 'Halfway to Nowhere', artist: 'Night Cartography', album: 'Isole Perdute',
+    art: 'radial-gradient(circle at 65% 30%, rgba(255,255,255,.25), transparent 40%), linear-gradient(135deg, #1a1738 0%, #8c2959 55%, #fa8c26 100%)',
+    lyrics: [
+      [0, '♪'], [42, 'Taillights paint the dashboard gold'],
+      [48, 'Half a tank and nowhere to be'], [55, 'You said turn the radio up'],
+      [62, 'So I let the night drive me'], [70, 'Halfway to nowhere, right on time'],
+      [78, 'Every wrong turn felt like mine'], [86, '♪'],
+    ] },
+  { title: 'Ferry Lights', artist: 'The Almond Coast', album: 'Rua do Mar',
+    art: 'radial-gradient(circle at 65% 30%, rgba(255,255,255,.25), transparent 40%), linear-gradient(135deg, #0f1b33 0%, #1f6f8b 55%, #ffb35c 100%)',
+    lyrics: [
+      [0, '♪'], [42, 'The ferry pulls away at ten'],
+      [48, 'Salt on the rail, rain on the glass'], [55, 'You count the harbour lights'],
+      [62, 'I count the things we never said'], [70, 'Ferry lights on black water'],
+      [78, 'Every window a small warm room'], [86, '♪'],
+    ] },
+  { title: 'Ombra e Sale', artist: 'Lume', album: 'Vetro',
+    art: 'radial-gradient(circle at 65% 30%, rgba(255,255,255,.25), transparent 40%), linear-gradient(135deg, #171220 0%, #5b3a6e 55%, #e8c9a0 100%)',
+    lyrics: [
+      [0, '♪'], [42, 'Ombra e sale sulla pelle'],
+      [48, 'La città respira piano'], [55, 'Hai lasciato la finestra aperta'],
+      [62, 'Per far entrare il mare'], [70, 'Ombra e sale, niente di più'],
+      [78, 'che restare qui con te'], [86, '♪'],
+    ] },
 ];
+let trackIdx = 0;
 function lyricAt(s) {
   let line = '♪';
-  for (const [t, txt] of LYRICS) if (t <= s) line = txt;
+  for (const [t, txt] of TRACKS[trackIdx].lyrics) if (t <= s) line = txt;
   return line;
 }
 function syncFaceButtons() {
@@ -461,7 +501,7 @@ function pillFace() {
   if (face === 'auto' && music) {
     pillArt.style.display = 'block'; eq.style.display = 'flex';
     pillT.style.display = 'block';
-    pillT.textContent = 'Halfway to Nowhere';   // title only, never the artist
+    pillT.textContent = TRACKS[trackIdx].title;   // title only, never the artist
   } else if (face === 'status') {
     clock.style.display = 'inline'; pbat.style.display = 'inline';
   } else if (face === 'lyrics' && music) {
@@ -469,7 +509,7 @@ function pillFace() {
     pillLyric.textContent = lyricAt(pos);
   } else if (face === 'title' && music) {
     pillT.style.display = 'block';
-    pillT.textContent = 'Halfway to Nowhere';
+    pillT.textContent = TRACKS[trackIdx].title;
   } else if (face === 'clock') {
     clock.style.display = 'inline';
   } else {
@@ -516,7 +556,8 @@ island.addEventListener('pointerup', e => {
 });
 island.addEventListener('click', e => {
   if (swiped) return;
-  if (state === 'pill' || state === 'peek') { cycleFace(+1); return; }
+  if (state === 'peek') { fit('pill'); return; }   // a click while peeking just dismisses it
+  if (state === 'pill') { cycleFace(+1); return; }
   if (e.target.closest('button') || e.target.closest('#seekTr') ||
       e.target.closest('#timerTile')) return;
   fit('pill');   // click on empty card space closes it
@@ -526,8 +567,10 @@ island.addEventListener('contextmenu', e => {
   fit(state === 'expanded' ? 'pill' : 'card');
 });
 island.addEventListener('keydown', e => {
+  if (e.target !== island) return;   // buttons inside the card handle their own keys
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
+    clearTimeout(leaveT);   // a stale mouse-leave timer must not close the reopened card
     fit(state === 'expanded' ? 'pill' : 'card');
   }
   if (e.key === 'ArrowRight' && state !== 'expanded') { e.preventDefault(); cycleFace(+1); }
@@ -536,7 +579,8 @@ island.addEventListener('keydown', e => {
 let leaveT = 0;
 island.addEventListener('mouseleave', () => {
   if (state !== 'expanded') return;
-  leaveT = setTimeout(() => fit('pill'), 900);
+  // the auto-close only ever dismisses the card — never a peek shown in between
+  leaveT = setTimeout(() => { if (state === 'expanded') fit('pill'); }, 900);
 });
 island.addEventListener('mouseenter', () => clearTimeout(leaveT));
 
@@ -578,10 +622,46 @@ document.getElementById('seekTr').addEventListener('click', e => {
 });
 drawSeek();
 
+/* tracks — prev / next wrap around the fake playlist */
+const cardTitle = document.querySelector('#card .title'),
+      cardArtist = document.querySelector('#card .artist'),
+      cardAlbum = document.querySelector('#card .album'),
+      cardArt = secs.card.querySelector('.art');
+function switchTrack(step) {
+  trackIdx = (trackIdx + step + TRACKS.length) % TRACKS.length;
+  const t = TRACKS[trackIdx];
+  cardTitle.textContent = t.title;
+  cardArtist.textContent = t.artist;
+  cardAlbum.textContent = t.album;
+  pillArt.style.background = t.art;   // same gradient on the pill and the card
+  cardArt.style.background = t.art;
+  pos = 0;
+  drawSeek();
+  pillFace();
+}
+document.getElementById('prevBtn').addEventListener('click', () => switchTrack(-1));
+document.getElementById('nextBtn').addEventListener('click', () => switchTrack(+1));
+
 /* toggles */
 for (const id of ['muteBtn', 'micBtn', 'cafBtn'])
   document.getElementById(id).addEventListener('click',
     e => e.currentTarget.classList.toggle('onn'));
+
+/* screenshot — a brief shutter flash over the screen */
+const screenEl = document.querySelector('.screen');
+const shotBtn = document.getElementById('shotBtn');
+shotBtn.addEventListener('click', () => {
+  if (screenEl.querySelector('.flash')) return;   // never stack two full-screen flashes
+  if (reduceMotion) {
+    shotBtn.classList.add('onn');   // static press feedback when motion is reduced
+    setTimeout(() => shotBtn.classList.remove('onn'), 600);
+    return;
+  }
+  const flash = document.createElement('div');
+  flash.className = 'flash';
+  screenEl.appendChild(flash);
+  setTimeout(() => flash.remove(), 400);
+});
 
 /* focus timer */
 const timerTile = document.getElementById('timerTile'),
@@ -607,7 +687,7 @@ const peeks = {
 document.querySelectorAll('[data-peek]').forEach(btn =>
   btn.addEventListener('click', () => showPeek(peeks[btn.dataset.peek])));
 function showPeek(p) {
-  if (state === 'expanded') return;
+  if (state === 'expanded') fit('pill');   // close the card first, then peek
   secs.peek.querySelector('.ico').textContent = p.ico;
   secs.peek.querySelector('.pt').textContent = p.t;
   secs.peek.querySelector('.pb').textContent = p.b || '';
