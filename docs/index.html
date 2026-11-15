@@ -3,202 +3,740 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LedgePill — live demo</title>
+<title>LedgePill — the Dynamic Island, everywhere</title>
+<meta name="description" content="A native Dynamic Island for Linux, Windows, macOS and Android. This page is a browser replica you can click, swipe and poke.">
+<meta name="theme-color" content="#08080d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2308080d'/%3E%3Crect x='6' y='12' width='20' height='8' rx='4' fill='%23fff'/%3E%3Ccircle cx='23.5' cy='16' r='1.6' fill='%23ff9f0a'/%3E%3C/svg%3E">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; }
-  body {
-    font-family: "Inter", "SF Pro Display", system-ui, sans-serif;
-    background: linear-gradient(135deg, #16142a 0%, #221636 55%, #0d0d16 100%);
-    color: #f2f2f4;
-    display: flex; flex-direction: column; align-items: center;
-    overflow-x: hidden;
+  /* ---------------------------------------------------------------- tokens */
+  :root {
+    --bg: #08080d;
+    --ink: #f5f5f8;
+    --ink-2: rgba(245, 245, 248, .72);
+    --ink-3: rgba(245, 245, 248, .46);
+    --ink-4: rgba(245, 245, 248, .28);
+    --accent: #ff9f0a;
+    --accent-ink: #1a1206;
+    --line: rgba(255, 255, 255, .09);
+    --line-soft: rgba(255, 255, 255, .05);
+    --panel: rgba(255, 255, 255, .04);
+    --panel-hi: rgba(255, 255, 255, .07);
+    --r-xl: 32px;
+    --r-lg: 24px;
+    --r-md: 16px;
+    --r-pill: 999px;
+    --shadow: 0 40px 90px -30px rgba(0, 0, 0, .9), 0 2px 8px rgba(0, 0, 0, .5);
+    --maxw: 1080px;
   }
-  .stage { flex: 1; display: flex; flex-direction: column; align-items: center; width: 100%; }
 
-  #island {
-    margin-top: 10px;
-    background: rgba(12, 12, 14, 0.97);
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 26px;
-    box-shadow: 0 8px 28px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.5);
-    transition: width .26s cubic-bezier(.34,1.2,.64,1),
-                height .26s cubic-bezier(.34,1.2,.64,1),
-                border-radius .26s;
-    position: relative; overflow: hidden; cursor: pointer;
-    user-select: none; -webkit-user-select: none;
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Inter", "SF Pro Display", -apple-system, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    line-height: 1.55;
   }
-  #island.expanded { border-radius: 34px; cursor: default; }
+
+  /* ambient light */
+  .ambient {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(60% 42% at 50% -8%, rgba(120, 86, 255, .30), transparent 70%),
+      radial-gradient(42% 34% at 88% 8%, rgba(255, 130, 40, .16), transparent 70%),
+      radial-gradient(50% 40% at 4% 32%, rgba(90, 60, 200, .14), transparent 72%),
+      linear-gradient(180deg, #0b0a14 0%, #08080d 42%, #06060a 100%);
+  }
+  .ambient::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, .022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, .022) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(70% 50% at 50% 0%, #000 0%, transparent 78%);
+    -webkit-mask-image: radial-gradient(70% 50% at 50% 0%, #000 0%, transparent 78%);
+  }
+
+  .wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  a { color: inherit; }
+
+  /* --------------------------------------------------------------- top bar */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    background: rgba(8, 8, 13, .62);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .topbar .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    height: 60px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    font-weight: 650;
+    font-size: 15px;
+    letter-spacing: -.01em;
+  }
+  .brand-mark {
+    width: 26px;
+    height: 13px;
+    border-radius: var(--r-pill);
+    background: #101014;
+    border: 1px solid rgba(255, 255, 255, .16);
+    position: relative;
+    flex: none;
+  }
+  .brand-mark::after {
+    content: "";
+    position: absolute;
+    right: 3.5px;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    margin-top: -2.5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .topnav { display: flex; align-items: center; gap: 22px; font-size: 13.5px; }
+  .topnav a {
+    text-decoration: none;
+    color: var(--ink-3);
+    font-weight: 500;
+    transition: color .16s ease;
+  }
+  .topnav a:hover { color: var(--ink); }
+  .topnav .cta {
+    color: var(--accent-ink);
+    background: var(--accent);
+    padding: 8px 15px;
+    border-radius: var(--r-pill);
+    font-weight: 650;
+    color: #1a1206;
+  }
+  .topnav .cta:hover { color: #1a1206; filter: brightness(1.08); }
+  @media (max-width: 620px) { .topnav .hide-sm { display: none; } }
+
+  /* ------------------------------------------------------------------ hero */
+  .hero { padding: 76px 0 40px; text-align: center; }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    font-weight: 650;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, .03);
+    padding: 7px 14px;
+    border-radius: var(--r-pill);
+  }
+  .eyebrow i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px 1px rgba(255, 159, 10, .7);
+  }
+  h1 {
+    margin: 26px auto 0;
+    max-width: 15ch;
+    font-size: clamp(2.35rem, 6.4vw, 4.15rem);
+    line-height: 1.02;
+    letter-spacing: -.035em;
+    font-weight: 700;
+  }
+  h1 .grad {
+    background: linear-gradient(96deg, #ffd8a1 0%, #ff9f0a 46%, #ff6a3d 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .lede {
+    margin: 22px auto 0;
+    max-width: 56ch;
+    font-size: clamp(.98rem, 1.6vw, 1.08rem);
+    color: var(--ink-2);
+  }
+  .platforms {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 26px;
+    list-style: none;
+  }
+  .platforms li {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-2);
+    border: 1px solid var(--line);
+    background: var(--panel);
+    padding: 6px 13px;
+    border-radius: var(--r-pill);
+  }
+
+  /* ------------------------------------------------------------------ demo */
+  .demo { padding: 12px 0 8px; }
+  .demo-wrap { display: flex; flex-direction: column; align-items: center; }
+  .stage { display: flex; flex-direction: column; align-items: center; }
+
+  /* the fake desktop the island hangs in */
+  .screen {
+    position: relative;
+    width: min(720px, 100%);
+    border-radius: var(--r-xl);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    background:
+      radial-gradient(110% 80% at 18% -10%, #2b1f4d 0%, transparent 58%),
+      radial-gradient(85% 70% at 88% 4%, #45203f 0%, transparent 52%),
+      radial-gradient(60% 50% at 50% 108%, #16131f 0%, transparent 70%),
+      linear-gradient(168deg, #15121f 0%, #0d0b14 58%, #08080d 100%);
+  }
+  .screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
+  }
+  .menubar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 18px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .menubar span { display: inline-flex; align-items: center; gap: 7px; }
+  .menubar .led {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .3);
+  }
+  .menubar .live { color: rgba(255, 159, 10, .8); }
+  .menubar .live .led { background: var(--accent); }
+
+  .stage {
+    padding: 16px 0 22px;
+    min-height: 210px;
+    justify-content: flex-start;
+  }
+
+  /* Opens as a card, so the island itself stays unpadded for measurement */
+  #island {
+    background: rgba(10, 10, 13, .97);
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: 26px;
+    box-shadow: 0 12px 34px rgba(0, 0, 0, .55), 0 1px 3px rgba(0, 0, 0, .5);
+    transition: width .26s cubic-bezier(.34, 1.2, .64, 1),
+                height .26s cubic-bezier(.34, 1.2, .64, 1),
+                border-radius .26s,
+                transform .2s ease;
+    transform-origin: top center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #island.expanded { border-radius: 30px; cursor: default; }
+  #island:not(.expanded):hover { transform: scale(1.04); }
+  #island:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
   #island > section {
-    position: absolute; top: 0; left: 0;
-    opacity: 0; pointer-events: none; transition: opacity .2s;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
     white-space: nowrap;
   }
   #island > section.on { opacity: 1; pointer-events: auto; }
 
-  /* pill */
+  /* pill face */
   #pill { display: flex; align-items: center; gap: 10px; padding: 9px 20px; }
-  #island:not(.expanded):hover { transform: scale(1.04); }
-  #island { transform-origin: top center; }
-  .dot { color: #ff9f0a; font-size: 13px; }
-  #clock { font-weight: 600; font-size: 14px; letter-spacing: .4px; }
+  .dot { color: var(--accent); font-size: 13px; }
+  #clock { font-weight: 650; font-size: 14px; letter-spacing: .4px; font-variant-numeric: tabular-nums; }
   #pill .art { width: 20px; height: 20px; border-radius: 5px; display: none; }
-  #pill .t { font-weight: 600; font-size: 13px; max-width: 300px;
-             overflow: hidden; text-overflow: ellipsis; display: none; }
-  #pbat { color: #ff9f0a; font-size: 11px; font-weight: 700; display: none; }
+  #pill .t {
+    font-weight: 650;
+    font-size: 13px;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: none;
+  }
+  #pbat { color: var(--accent); font-size: 11px; font-weight: 700; display: none; font-variant-numeric: tabular-nums; }
   .eq { display: none; align-items: center; gap: 2.5px; height: 14px; }
-  .eq i { width: 3px; height: 4px; border-radius: 2px; background: #f2f2f4;
-          transition: height .06s linear; }
+  .eq i {
+    width: 3px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--ink);
+    transition: height .06s linear;
+  }
 
   /* peek */
   #peek { display: flex; align-items: center; gap: 12px; padding: 12px 22px; }
-  #peek .ico { font-size: 17px; color: #ff9f0a; width: 22px; text-align: center; }
+  #peek .ico { font-size: 17px; color: var(--accent); width: 22px; text-align: center; }
   #peek .pt { font-weight: 700; font-size: 13px; }
-  #peek .pb { font-size: 12px; color: rgba(242,242,244,.65); }
-  #peek .bar { width: 150px; height: 6px; border-radius: 99px;
-               background: rgba(255,255,255,.12); overflow: hidden; }
-  #peek .bar i { display: block; height: 100%; background: #fff;
-                 border-radius: 99px; }
+  #peek .pb { font-size: 12px; color: var(--ink-2); }
+  #peek .bar {
+    width: 150px;
+    height: 6px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, .12);
+    overflow: hidden;
+  }
+  #peek .bar i { display: block; height: 100%; background: #fff; border-radius: var(--r-pill); }
 
-  /* card */
-  #card { padding: 20px; width: 400px; white-space: normal; }
+  /* expanded card */
+  #card { padding: 20px; width: min(400px, calc(100vw - 56px)); white-space: normal; }
   .chips { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 12px; }
-  .chip { background: rgba(255,255,255,.06); border-radius: 99px;
-          padding: 4px 11px; font-size: 11px; font-weight: 600;
-          color: rgba(242,242,244,.7); }
+  .chip {
+    background: rgba(255, 255, 255, .06);
+    border-radius: var(--r-pill);
+    padding: 4px 11px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
   .head { display: flex; gap: 14px; align-items: center; }
   .head .art { width: 92px; height: 92px; border-radius: 20px; flex: none; }
-  .art { background:
-    radial-gradient(circle at 65% 30%, rgba(255,255,255,.25), transparent 40%),
-    linear-gradient(135deg, #1a1738 0%, #8c2959 55%, #fa8c26 100%); }
-  .meta .title { font-weight: 700; font-size: 16px; }
-  .meta .artist { font-size: 13px; color: rgba(242,242,244,.7); margin-top: 3px; }
-  .meta .album { font-size: 11px; color: rgba(242,242,244,.45); margin-top: 3px; }
-  .seek { display: flex; align-items: center; gap: 8px; margin: 14px 0 4px; }
-  .seek span { font-size: 10px; font-weight: 600; color: rgba(242,242,244,.55);
-               font-variant-numeric: tabular-nums; }
-  .seek .tr { flex: 1; height: 5px; border-radius: 99px;
-              background: rgba(255,255,255,.12); position: relative; cursor: pointer; }
-  .seek .tr i { position: absolute; left: 0; top: 0; height: 100%;
-                background: #ff9f0a; border-radius: 99px; }
-  .seek .tr b { position: absolute; top: 50%; width: 12px; height: 12px;
-                border-radius: 99px; background: #fff; transform: translate(-6px,-50%);
-                box-shadow: 0 1px 3px rgba(0,0,0,.4); }
-  .controls { display: flex; justify-content: center; align-items: center;
-              gap: 18px; margin: 10px 0 4px; }
-  .controls button {
-    background: transparent; border: none; color: #f2f2f4; font-size: 17px;
-    width: 38px; height: 38px; border-radius: 99px; cursor: pointer;
+  .art {
+    background:
+      radial-gradient(circle at 65% 30%, rgba(255, 255, 255, .25), transparent 40%),
+      linear-gradient(135deg, #1a1738 0%, #8c2959 55%, #fa8c26 100%);
   }
-  .controls button:hover { background: rgba(255,255,255,.1); }
-  .controls .main { background: rgba(255,255,255,.1); width: 52px; height: 52px;
-                    font-size: 21px; }
+  .meta { min-width: 0; }
+  .meta .title { font-weight: 700; font-size: 16px; }
+  .meta .artist { font-size: 13px; color: var(--ink-2); margin-top: 3px; }
+  .meta .album { font-size: 11px; color: var(--ink-3); margin-top: 3px; }
+  .seek { display: flex; align-items: center; gap: 8px; margin: 14px 0 4px; }
+  .seek span {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .seek .tr {
+    flex: 1;
+    height: 5px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, .12);
+    position: relative;
+    cursor: pointer;
+  }
+  .seek .tr i {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: var(--accent);
+    border-radius: var(--r-pill);
+  }
+  .seek .tr b {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    transform: translate(-6px, -50%);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .4);
+  }
+  .controls { display: flex; justify-content: center; align-items: center; gap: 18px; margin: 10px 0 4px; }
+  .controls button {
+    background: transparent;
+    border: none;
+    color: var(--ink);
+    font-size: 17px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .controls button:hover { background: rgba(255, 255, 255, .1); }
+  .controls .main { background: rgba(255, 255, 255, .1); width: 52px; height: 52px; font-size: 21px; }
   .toggles { display: flex; justify-content: center; gap: 12px; margin: 12px 0; }
-  .toggles button { width: 44px; height: 44px; border-radius: 99px; border: none;
-    background: rgba(255,255,255,.07); color: #f2f2f4; font-size: 16px; cursor: pointer; }
-  .toggles button:hover { background: rgba(255,255,255,.13); }
-  .toggles button.onn { background: #ff9f0a; color: #0c0c0e; }
+  .toggles button {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, .07);
+    color: var(--ink);
+    font-size: 16px;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .toggles button:hover { background: rgba(255, 255, 255, .13); }
+  .toggles button.onn { background: var(--accent); color: #0c0c0e; }
   .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-  .tile { background: rgba(255,255,255,.06); border-radius: 18px; padding: 12px 8px;
-          text-align: center; }
+  .tile { background: rgba(255, 255, 255, .06); border-radius: 18px; padding: 12px 8px; text-align: center; }
   .tile .big { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
-  .tile .sub { font-size: 10px; color: rgba(242,242,244,.55); margin-top: 4px; }
+  .tile .sub { font-size: 10px; color: var(--ink-3); margin-top: 4px; }
   .tile svg { display: block; margin: 0 auto 2px; }
   #timerTile { cursor: pointer; }
-  #timerTile.run .big { color: #ff9f0a; }
-  .sys { text-align: center; font-size: 11px; font-weight: 600;
-         color: rgba(242,242,244,.45); margin-top: 12px; }
+  #timerTile.run .big { color: var(--accent); }
+  .sys { text-align: center; font-size: 11px; font-weight: 600; color: var(--ink-3); margin-top: 12px; }
 
-  .hint { margin-top: 26px; font-size: 13px; color: rgba(242,242,244,.55); }
-  .triggers { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;
-              justify-content: center; }
-  .triggers button {
-    background: rgba(255,255,255,.08); color: #f2f2f4; border: none;
-    border-radius: 99px; padding: 8px 16px; font-size: 12.5px; font-weight: 600;
-    cursor: pointer; font-family: inherit;
+  .caption {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-4);
+    padding: 0 18px;
   }
-  .triggers button:hover { background: rgba(255,255,255,.15); }
-  .get { margin: 34px 0 26px; font-size: 13px; color: rgba(242,242,244,.6); }
-  .get a { color: #ff9f0a; text-decoration: none; font-weight: 600; }
+  @media (max-width: 420px) {
+    #pill { gap: 8px; padding: 8px 14px; }
+    #pill .t { max-width: 150px; }
+    .tiles { gap: 6px; }
+    .tile { padding: 10px 4px; }
+  }
+
+  /* ---------------------------------------------------------------- controls */
+  .deck { margin-top: 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .group-label {
+    font-size: 10.5px;
+    font-weight: 650;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    margin-bottom: 9px;
+    text-align: center;
+  }
+  .group { text-align: center; }
+  .chiprow { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .chiprow button {
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-2);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .chiprow button:hover { background: var(--panel-hi); color: var(--ink); }
+  .chiprow button.on {
+    background: rgba(255, 159, 10, .14);
+    border-color: rgba(255, 159, 10, .42);
+    color: #ffce85;
+  }
+  .chiprow button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .tip { font-size: 12.5px; color: var(--ink-3); text-align: center; max-width: 52ch; }
+
+  /* ------------------------------------------------------------------ facts */
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 72px 0 0;
+    list-style: none;
+  }
+  .facts li {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 20px 18px;
+  }
+  .facts .num {
+    display: block;
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .facts .cap { display: block; font-size: 12.5px; color: var(--ink-3); margin-top: 5px; }
+  @media (max-width: 760px) { .facts { grid-template-columns: repeat(2, 1fr); } }
+
+  /* -------------------------------------------------------------------- cta */
+  .cta-panel {
+    margin: 64px 0 0;
+    border: 1px solid var(--line);
+    border-radius: var(--r-xl);
+    padding: 44px 32px;
+    text-align: center;
+    background:
+      radial-gradient(80% 120% at 50% -20%, rgba(255, 159, 10, .16), transparent 62%),
+      linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
+  }
+  .cta-panel h2 {
+    font-size: clamp(1.5rem, 3.4vw, 2.05rem);
+    letter-spacing: -.028em;
+    line-height: 1.15;
+  }
+  .cta-panel p { color: var(--ink-2); font-size: 14.5px; margin: 12px auto 0; max-width: 46ch; }
+  .buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 26px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 650;
+    padding: 12px 20px;
+    border-radius: var(--r-pill);
+    border: 1px solid transparent;
+    transition: transform .15s ease, filter .15s ease, background .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--accent); color: #1a1206; }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-ghost { background: var(--panel); border-color: var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: var(--panel-hi); }
+
+  .install {
+    margin: 26px auto 0;
+    max-width: 620px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: rgba(0, 0, 0, .42);
+    padding: 14px 16px;
+    text-align: left;
+    overflow-x: auto;
+  }
+  .install code {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    color: #d6d6de;
+    white-space: pre;
+  }
+  .install .p { color: var(--accent); user-select: none; }
+
+  /* ----------------------------------------------------------------- footer */
+  footer {
+    margin-top: 72px;
+    border-top: 1px solid var(--line-soft);
+    padding: 30px 0 46px;
+  }
+  footer .wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  footer .note { font-size: 12.5px; color: var(--ink-4); }
+  footer nav { display: flex; flex-wrap: wrap; gap: 18px; font-size: 13px; }
+  footer nav a { color: var(--ink-3); text-decoration: none; }
+  footer nav a:hover { color: var(--ink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
 </style>
 </head>
 <body>
-<div class="stage">
-  <div id="island">
-    <section id="pill" class="on">
-      <div class="art"></div>
-      <div class="t" id="ptitle"></div>
-      <div class="t" id="plyric"></div>
-      <div class="eq"><i></i><i></i><i></i><i></i><i></i></div>
-      <span class="dot">●</span>
-      <span id="clock">--:--</span>
-      <span id="pbat">⚡ 84%</span>
-    </section>
+<div class="ambient" aria-hidden="true"></div>
 
-    <section id="peek">
-      <span class="ico"></span>
-      <div><div class="pt"></div><div class="pb"></div></div>
-      <div class="bar"><i></i></div>
-    </section>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="https://github.com/Mariakevin/LedgePill">
+      <span class="brand-mark" aria-hidden="true"></span> LedgePill
+    </a>
+    <nav class="topnav">
+      <a class="hide-sm" href="#demo">Demo</a>
+      <a class="hide-sm" href="https://github.com/Mariakevin/LedgePill#readme">Docs</a>
+      <a class="hide-sm" href="https://github.com/Mariakevin/LedgePill/releases">Releases</a>
+      <a class="cta" href="https://github.com/Mariakevin/LedgePill">Star on GitHub</a>
+    </nav>
+  </div>
+</header>
 
-    <section id="card">
-      <div class="chips"><span class="chip">ᛒ MX Buds · 80%</span><span class="chip">HomeNet</span></div>
-      <div class="head">
-        <div class="art"></div>
-        <div class="meta">
-          <div class="title">Halfway to Nowhere</div>
-          <div class="artist">Night Cartography</div>
-          <div class="album">Isole Perdute</div>
+<main class="wrap">
+  <section class="hero">
+    <p class="eyebrow"><i aria-hidden="true"></i> Browser replica</p>
+    <h1>The Dynamic Island,<br><span class="grad">on every screen you own.</span></h1>
+    <p class="lede">
+      A little black island lives at the top of your screen. It breathes with your music,
+      peeks when something happens, and blooms into a full card when you ask.
+      This page is the web replica — poke it as much as you like.
+    </p>
+    <ul class="platforms">
+      <li>Linux</li>
+      <li>Windows</li>
+      <li>macOS</li>
+      <li>Android</li>
+      <li>MIT</li>
+    </ul>
+  </section>
+
+  <section class="demo" id="demo" aria-label="Interactive demo">
+    <div class="demo-wrap">
+      <div class="screen">
+        <div class="menubar" aria-hidden="true">
+          <span>LedgePill</span>
+          <span class="live"><i class="led"></i> live demo</span>
         </div>
-      </div>
-      <div class="seek">
-        <span id="tNow">0:47</span>
-        <div class="tr" id="seekTr"><i></i><b></b></div>
-        <span>3:34</span>
-      </div>
-      <div class="controls">
-        <button>⏮</button>
-        <button class="main" id="playBtn">⏸</button>
-        <button>⏭</button>
-      </div>
-      <div class="toggles">
-        <button id="muteBtn" title="Mute">🔊</button>
-        <button id="micBtn" title="Mic">🎙</button>
-        <button id="cafBtn" title="Caffeine">☕</button>
-        <button title="Screenshot">📷</button>
-      </div>
-      <div class="tiles">
-        <div class="tile">
-          <svg width="40" height="40" viewBox="0 0 40 40">
-            <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="3.5"/>
-            <circle cx="20" cy="20" r="16" fill="none" stroke="#34d64a" stroke-width="3.5"
-              stroke-linecap="round" stroke-dasharray="84.4 100.5"
-              transform="rotate(-90 20 20)"/>
-          </svg>
-          <div class="sub">84%</div>
-        </div>
-        <div class="tile"><div class="big">🔊</div><div class="sub">Volume</div></div>
-        <div class="tile" id="timerTile"><div class="big" id="timerTxt">25:00</div><div class="sub">Focus</div></div>
-        <div class="tile"><div class="big">☀️ 24°</div><div class="sub">Sunny</div></div>
-      </div>
-      <div class="sys">CPU 6%&nbsp;&nbsp;·&nbsp;&nbsp;RAM 5.9 GiB (38%)</div>
-    </section>
-  </div>
+        <div class="stage">
+          <div id="island" tabindex="0" role="group" aria-label="LedgePill island — click to flip faces, right-click to open the card">
+            <section id="pill" class="on">
+              <div class="art"></div>
+              <div class="t" id="ptitle"></div>
+              <div class="t" id="plyric"></div>
+              <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+              <span class="dot">●</span>
+              <span id="clock">--:--</span>
+              <span id="pbat">⚡ 84%</span>
+            </section>
 
-  <div class="hint">click to flip faces · swipe to switch · right-click opens the card</div>
-  <div class="triggers">
-    <button data-peek="volume">volume peek</button>
-    <button data-peek="notify">notification peek</button>
-    <button data-peek="charge">charger peek</button>
+            <section id="peek">
+              <span class="ico"></span>
+              <div><div class="pt"></div><div class="pb"></div></div>
+              <div class="bar"><i></i></div>
+            </section>
+
+            <section id="card">
+              <div class="chips"><span class="chip">ᛒ MX Buds · 80%</span><span class="chip">HomeNet</span></div>
+              <div class="head">
+                <div class="art"></div>
+                <div class="meta">
+                  <div class="title">Halfway to Nowhere</div>
+                  <div class="artist">Night Cartography</div>
+                  <div class="album">Isole Perdute</div>
+                </div>
+              </div>
+              <div class="seek">
+                <span id="tNow">0:47</span>
+                <div class="tr" id="seekTr"><i></i><b></b></div>
+                <span>3:34</span>
+              </div>
+              <div class="controls">
+                <button aria-label="Previous track">⏮</button>
+                <button class="main" id="playBtn" aria-label="Play or pause">⏸</button>
+                <button aria-label="Next track">⏭</button>
+              </div>
+              <div class="toggles">
+                <button id="muteBtn" title="Mute" aria-label="Toggle mute">🔊</button>
+                <button id="micBtn" title="Mic" aria-label="Toggle microphone">🎙</button>
+                <button id="cafBtn" title="Caffeine" aria-label="Toggle caffeine mode">☕</button>
+                <button title="Screenshot" aria-label="Take a screenshot">📷</button>
+              </div>
+              <div class="tiles">
+                <div class="tile">
+                  <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="3.5"/>
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="#34d64a" stroke-width="3.5"
+                      stroke-linecap="round" stroke-dasharray="84.4 100.5"
+                      transform="rotate(-90 20 20)"/>
+                  </svg>
+                  <div class="sub">84%</div>
+                </div>
+                <div class="tile"><div class="big">🔊</div><div class="sub">Volume</div></div>
+                <div class="tile" id="timerTile"><div class="big" id="timerTxt">25:00</div><div class="sub">Focus</div></div>
+                <div class="tile"><div class="big">☀️ 24°</div><div class="sub">Sunny</div></div>
+              </div>
+              <div class="sys">CPU 6%&nbsp;&nbsp;·&nbsp;&nbsp;RAM 5.9 GiB (38%)</div>
+            </section>
+          </div>
+        </div>
+        <p class="caption">click to flip faces · swipe to switch · right-click opens the card</p>
+      </div>
+
+      <div class="deck">
+        <div class="group">
+          <div class="group-label" id="faces-label">Pill faces</div>
+          <div class="chiprow" role="group" aria-labelledby="faces-label">
+            <button data-face="0">auto</button>
+            <button data-face="1">status</button>
+            <button data-face="2">lyrics</button>
+            <button data-face="3">title</button>
+            <button data-face="4">clock</button>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-label" id="peeks-label">Trigger a peek</div>
+          <div class="chiprow" role="group" aria-labelledby="peeks-label">
+            <button data-peek="volume">volume</button>
+            <button data-peek="notify">notification</button>
+            <button data-peek="charge">charger</button>
+          </div>
+        </div>
+        <p class="tip">The face deck is the app's idea: a swipe swaps what lives in the pill — now playing, clock and battery, the current lyric, or just the title.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Project facts">
+    <ul class="facts">
+      <li>
+        <span class="num">Native GTK4</span>
+        <span class="cap">No Electron, no web runtime</span>
+      </li>
+      <li>
+        <span class="num">≈ 0.2 %</span>
+        <span class="cap">idle CPU — event-driven, not polling</span>
+      </li>
+      <li>
+        <span class="num">≈ 110 MB</span>
+        <span class="cap">PSS for the whole island</span>
+      </li>
+      <li>
+        <span class="num">4 platforms</span>
+        <span class="cap">Linux first, then Windows, macOS, Android</span>
+      </li>
+    </ul>
+  </section>
+
+  <section class="cta-panel">
+    <h2>Take it off the browser.</h2>
+    <p>The real thing sits on your desktop, follows your media player and keeps quiet until something happens.</p>
+    <div class="buttons">
+      <a class="btn btn-primary" href="https://github.com/Mariakevin/LedgePill/releases">Download</a>
+      <a class="btn btn-ghost" href="https://github.com/Mariakevin/LedgePill#readme">Read the README</a>
+    </div>
+    <div class="install">
+      <code><span class="p">$</span> curl -fsSL https://raw.githubusercontent.com/Mariakevin/LedgePill/main/packaging/install.sh | sudo bash</code>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="note">MIT licensed · built for Linux first</span>
+    <nav>
+      <a href="https://github.com/Mariakevin/LedgePill">GitHub</a>
+      <a href="https://github.com/Mariakevin/LedgePill/releases">Releases</a>
+      <a href="https://github.com/Mariakevin/LedgePill/issues">Issues</a>
+      <a href="https://github.com/Mariakevin/LedgePill/blob/main/LICENSE">License</a>
+    </nav>
   </div>
-  <div class="get">
-    Web replica of the native GTK4 app —
-    <a href="https://github.com/Mariakevin/LedgePill">get the real one</a>
-    (Linux · Windows · macOS · Android)
-    <br><br>
-    <a href="https://github.com/Mariakevin/LedgePill">⭐ Star it on GitHub</a> — it keeps the island alive
-  </div>
-</div>
+</footer>
 
 <script>
 const island = document.getElementById('island');
@@ -206,12 +744,12 @@ const secs = { pill: document.getElementById('pill'),
                peek: document.getElementById('peek'),
                card: document.getElementById('card') };
 let state = 'pill', playing = true, pos = 47, peekTimer = 0;
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function fit(name) {
   const el = secs[name];
   for (const k in secs) secs[k].classList.toggle('on', k === name);
   island.classList.toggle('expanded', name === 'card');
-  const r = el.getBoundingClientRect();
   island.style.width = el.scrollWidth + 'px';
   island.style.height = el.scrollHeight + 'px';
   state = name === 'card' ? 'expanded' : name;
@@ -238,6 +776,10 @@ function lyricAt(s) {
   for (const [t, txt] of LYRICS) if (t <= s) line = txt;
   return line;
 }
+function syncFaceButtons() {
+  document.querySelectorAll('[data-face]').forEach(b =>
+    b.classList.toggle('on', Number(b.dataset.face) === faceIdx));
+}
 function pillFace() {
   const face = FACES[faceIdx], music = playing;
   for (const el of [pillArt, pillT, pillLyric]) el.style.display = 'none';
@@ -261,6 +803,7 @@ function pillFace() {
   } else {
     dot.style.display = 'inline'; clock.style.display = 'inline';
   }
+  syncFaceButtons();
   if (state === 'pill') fit('pill');
 }
 function cycleFace(step) {
@@ -269,15 +812,15 @@ function cycleFace(step) {
 }
 function tickClock() {
   const d = new Date();
-  clock.textContent = String(d.getHours()).padStart(2,'0') + ':' +
-                      String(d.getMinutes()).padStart(2,'0');
+  clock.textContent = String(d.getHours()).padStart(2, '0') + ':' +
+                      String(d.getMinutes()).padStart(2, '0');
 }
 tickClock(); setInterval(tickClock, 5000);
 
 /* beat-driven EQ — kick on the beat, bar 1 = bass … bar 5 = highs */
 const bars = eq.querySelectorAll('i'), BPM = 122;
 const resp = [1.0, 0.85, 0.55, 0.4, 0.3], shim = [0.05, 0.1, 0.25, 0.35, 0.45];
-setInterval(() => {
+if (!reduceMotion) setInterval(() => {
   if (!playing || state !== 'pill') return;
   const t = performance.now() / 1000, beat = t * BPM / 60;
   const kick = Math.pow(Math.max(0, Math.cos(beat * 2 * Math.PI)), 14);
@@ -310,12 +853,28 @@ island.addEventListener('contextmenu', e => {
   e.preventDefault();
   fit(state === 'expanded' ? 'pill' : 'card');
 });
+island.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    fit(state === 'expanded' ? 'pill' : 'card');
+  }
+  if (e.key === 'ArrowRight' && state !== 'expanded') { e.preventDefault(); cycleFace(+1); }
+  if (e.key === 'ArrowLeft' && state !== 'expanded') { e.preventDefault(); cycleFace(-1); }
+});
 let leaveT = 0;
 island.addEventListener('mouseleave', () => {
   if (state !== 'expanded') return;
   leaveT = setTimeout(() => fit('pill'), 900);
 });
 island.addEventListener('mouseenter', () => clearTimeout(leaveT));
+
+/* explicit face picker under the demo */
+document.querySelectorAll('[data-face]').forEach(btn =>
+  btn.addEventListener('click', () => {
+    faceIdx = Number(btn.dataset.face);
+    if (state !== 'pill') fit('pill');
+    pillFace();
+  }));
 
 /* player */
 const playBtn = document.getElementById('playBtn'),
@@ -339,7 +898,7 @@ setInterval(() => {
 function drawSeek() {
   const f = pos / LEN * 100;
   seekFill.style.width = f + '%'; seekKnob.style.left = f + '%';
-  tNow.textContent = Math.floor(pos/60) + ':' + String(pos%60).padStart(2,'0');
+  tNow.textContent = Math.floor(pos / 60) + ':' + String(pos % 60).padStart(2, '0');
 }
 document.getElementById('seekTr').addEventListener('click', e => {
   const r = e.currentTarget.getBoundingClientRect();
@@ -348,23 +907,23 @@ document.getElementById('seekTr').addEventListener('click', e => {
 drawSeek();
 
 /* toggles */
-for (const id of ['muteBtn','micBtn','cafBtn'])
+for (const id of ['muteBtn', 'micBtn', 'cafBtn'])
   document.getElementById(id).addEventListener('click',
     e => e.currentTarget.classList.toggle('onn'));
 
 /* focus timer */
 const timerTile = document.getElementById('timerTile'),
       timerTxt = document.getElementById('timerTxt');
-let tLeft = 25*60, tRun = false;
+let tLeft = 25 * 60, tRun = false;
 timerTile.addEventListener('click', () => {
   tRun = !tRun; timerTile.classList.toggle('run', tRun);
 });
 setInterval(() => {
   if (!tRun) return;
   tLeft = Math.max(0, tLeft - 1);
-  timerTxt.textContent = String(Math.floor(tLeft/60)).padStart(2,'0') + ':' +
-                         String(tLeft%60).padStart(2,'0');
-  if (!tLeft) { tRun = false; timerTile.classList.remove('run'); tLeft = 25*60; }
+  timerTxt.textContent = String(Math.floor(tLeft / 60)).padStart(2, '0') + ':' +
+                         String(tLeft % 60).padStart(2, '0');
+  if (!tLeft) { tRun = false; timerTile.classList.remove('run'); tLeft = 25 * 60; }
 }, 1000);
 
 /* peeks */
