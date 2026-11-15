@@ -1,0 +1,30 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# --- Windows (WPF) ---
+windows/bin/
+windows/obj/
+*.user
+
+# --- macOS ---
+macos/.build/
+macos/*.app/
+macos/LedgePill-macos.zip
+
+# --- Android ---
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.apk
+.idea/
+*.iml
+
+# --- Misc ---
+.DS_Store
