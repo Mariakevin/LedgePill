@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LedgePill — live demo</title>
+<meta name="description" content="Click, swipe and poke the LedgePill island: pill faces, peeks and the expanded card, all in the browser.">
+<meta name="theme-color" content="#08080d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2308080d'/%3E%3Crect x='6' y='12' width='20' height='8' rx='4' fill='%23fff'/%3E%3Ccircle cx='23.5' cy='16' r='1.6' fill='%23ff9f0a'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ------------------------------------------------------------------ demo */
+  .demo { padding: 12px 0 8px; }
+  .demo-wrap { display: flex; flex-direction: column; align-items: center; padding-top: 8px; }
+  .stage { display: flex; flex-direction: column; align-items: center; }
+
+  /* the fake desktop the island hangs in */
+  .screen {
+    position: relative;
+    width: min(720px, 100%);
+    border-radius: var(--r-xl);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    background:
+      radial-gradient(110% 80% at 18% -10%, #2b1f4d 0%, transparent 58%),
+      radial-gradient(85% 70% at 88% 4%, #45203f 0%, transparent 52%),
+      radial-gradient(60% 50% at 50% 108%, #16131f 0%, transparent 70%),
+      linear-gradient(168deg, #15121f 0%, #0d0b14 58%, #08080d 100%);
+  }
+  .screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
+  }
+  .menubar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 18px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .menubar span { display: inline-flex; align-items: center; gap: 7px; }
+  .menubar .led {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .3);
+  }
+  .menubar .live { color: rgba(255, 159, 10, .8); }
+  .menubar .live .led { background: var(--accent); }
+
+  .stage {
+    padding: 16px 0 22px;
+    min-height: 210px;
+    justify-content: flex-start;
+  }
+
+  /* Opens as a card, so the island itself stays unpadded for measurement */
+  #island {
+    background: rgba(10, 10, 13, .97);
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: 26px;
+    box-shadow: 0 12px 34px rgba(0, 0, 0, .55), 0 1px 3px rgba(0, 0, 0, .5);
+    transition: width .26s cubic-bezier(.34, 1.2, .64, 1),
+                height .26s cubic-bezier(.34, 1.2, .64, 1),
+                border-radius .26s,
+                transform .2s ease;
+    transform-origin: top center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #island.expanded { border-radius: 30px; cursor: default; }
+  #island:not(.expanded):hover { transform: scale(1.04); }
+  #island:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+  #island > section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+    white-space: nowrap;
+  }
+  #island > section.on { opacity: 1; pointer-events: auto; }
+
+  /* pill face */
+  #pill { display: flex; align-items: center; gap: 10px; padding: 9px 20px; }
+  .dot { color: var(--accent); font-size: 13px; }
+  #clock { font-weight: 650; font-size: 14px; letter-spacing: .4px; font-variant-numeric: tabular-nums; }
+  #pill .art { width: 20px; height: 20px; border-radius: 5px; display: none; }
+  #pill .t {
+    font-weight: 650;
+    font-size: 13px;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: none;
+  }
+  #pbat { color: var(--accent); font-size: 11px; font-weight: 700; display: none; font-variant-numeric: tabular-nums; }
+  .eq { display: none; align-items: center; gap: 2.5px; height: 14px; }
+  .eq i {
+    width: 3px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--ink);
+    transition: height .06s linear;
+  }
+
+  /* peek */
+  #peek { display: flex; align-items: center; gap: 12px; padding: 12px 22px; }
+  #peek .ico { font-size: 17px; color: var(--accent); width: 22px; text-align: center; }
+  #peek .pt { font-weight: 700; font-size: 13px; }
+  #peek .pb { font-size: 12px; color: var(--ink-2); }
+  #peek .bar {
+    width: 150px;
+    height: 6px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, .12);
+    overflow: hidden;
+  }
+  #peek .bar i { display: block; height: 100%; background: #fff; border-radius: var(--r-pill); }
+
+  /* expanded card */
+  #card { padding: 20px; width: min(400px, calc(100vw - 56px)); white-space: normal; }
+  .chips { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 12px; }
+  .chip {
+    background: rgba(255, 255, 255, .06);
+    border-radius: var(--r-pill);
+    padding: 4px 11px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .head { display: flex; gap: 14px; align-items: center; }
+  .head .art { width: 92px; height: 92px; border-radius: 20px; flex: none; }
+  .art {
+    background:
+      radial-gradient(circle at 65% 30%, rgba(255, 255, 255, .25), transparent 40%),
+      linear-gradient(135deg, #1a1738 0%, #8c2959 55%, #fa8c26 100%);
+  }
+  .meta { min-width: 0; }
+  .meta .title { font-weight: 700; font-size: 16px; }
+  .meta .artist { font-size: 13px; color: var(--ink-2); margin-top: 3px; }
+  .meta .album { font-size: 11px; color: var(--ink-3); margin-top: 3px; }
+  .seek { display: flex; align-items: center; gap: 8px; margin: 14px 0 4px; }
+  .seek span {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .seek .tr {
+    flex: 1;
+    height: 5px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, .12);
+    position: relative;
+    cursor: pointer;
+  }
+  .seek .tr i {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: var(--accent);
+    border-radius: var(--r-pill);
+  }
+  .seek .tr b {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    transform: translate(-6px, -50%);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .4);
+  }
+  .controls { display: flex; justify-content: center; align-items: center; gap: 18px; margin: 10px 0 4px; }
+  .controls button {
+    background: transparent;
+    border: none;
+    color: var(--ink);
+    font-size: 17px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .controls button:hover { background: rgba(255, 255, 255, .1); }
+  .controls .main { background: rgba(255, 255, 255, .1); width: 52px; height: 52px; font-size: 21px; }
+  .toggles { display: flex; justify-content: center; gap: 12px; margin: 12px 0; }
+  .toggles button {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, .07);
+    color: var(--ink);
+    font-size: 16px;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .toggles button:hover { background: rgba(255, 255, 255, .13); }
+  .toggles button.onn { background: var(--accent); color: #0c0c0e; }
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .tile { background: rgba(255, 255, 255, .06); border-radius: 18px; padding: 12px 8px; text-align: center; }
+  .tile .big { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .tile .sub { font-size: 10px; color: var(--ink-3); margin-top: 4px; }
+  .tile svg { display: block; margin: 0 auto 2px; }
+  #timerTile { cursor: pointer; }
+  #timerTile.run .big { color: var(--accent); }
+  .sys { text-align: center; font-size: 11px; font-weight: 600; color: var(--ink-3); margin-top: 12px; }
+
+  .caption {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-4);
+    padding: 0 18px;
+  }
+  @media (max-width: 420px) {
+    #pill { gap: 8px; padding: 8px 14px; }
+    #pill .t { max-width: 150px; }
+    .tiles { gap: 6px; }
+    .tile { padding: 10px 4px; }
+  }
+
+  /* ---------------------------------------------------------------- controls */
+  .deck { margin-top: 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .group-label {
+    font-size: 10.5px;
+    font-weight: 650;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    margin-bottom: 9px;
+    text-align: center;
+  }
+  .group { text-align: center; }
+  .chiprow { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .chiprow button {
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-2);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .chiprow button:hover { background: var(--panel-hi); color: var(--ink); }
+  .chiprow button.on {
+    background: rgba(255, 159, 10, .14);
+    border-color: rgba(255, 159, 10, .42);
+    color: #ffce85;
+  }
+  .chiprow button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .tip { font-size: 12.5px; color: var(--ink-3); text-align: center; max-width: 52ch; }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true"></span> LedgePill
+    </a>
+    <nav class="topnav">
+      <a href="index.html">Home</a>
+      <a href="demo.html" aria-current="page">Demo</a>
+      <a href="install.html">Install</a>
+      <a class="hide-sm" href="https://github.com/Mariakevin/LedgePill/releases">Releases</a>
+      <a class="cta" href="https://github.com/Mariakevin/LedgePill">Star on GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="page-head">
+    <p class="eyebrow"><i aria-hidden="true"></i> Browser replica</p>
+    <h1>The island, <span class="grad">live in your browser.</span></h1>
+    <p class="lede">
+      Play with the real thing by proxy: flip the pill faces, fire a peek, open the card.
+      Nothing here is a screenshot — it's the same geometry and timing as the native app.
+    </p>
+  </section>
+
+  <section class="demo" id="demo" aria-label="Interactive demo">
+    <div class="demo-wrap">
+      <div class="screen">
+        <div class="menubar" aria-hidden="true">
+          <span>LedgePill</span>
+          <span class="live"><i class="led"></i> live demo</span>
+        </div>
+        <div class="stage">
+          <div id="island" tabindex="0" role="group" aria-label="LedgePill island — click to flip faces, right-click to open the card">
+            <section id="pill" class="on">
+              <div class="art"></div>
+              <div class="t" id="ptitle"></div>
+              <div class="t" id="plyric"></div>
+              <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+              <span class="dot">●</span>
+              <span id="clock">--:--</span>
+              <span id="pbat">⚡ 84%</span>
+            </section>
+
+            <section id="peek">
+              <span class="ico"></span>
+              <div><div class="pt"></div><div class="pb"></div></div>
+              <div class="bar"><i></i></div>
+            </section>
+
+            <section id="card">
+              <div class="chips"><span class="chip">ᛒ MX Buds · 80%</span><span class="chip">HomeNet</span></div>
+              <div class="head">
+                <div class="art"></div>
+                <div class="meta">
+                  <div class="title">Halfway to Nowhere</div>
+                  <div class="artist">Night Cartography</div>
+                  <div class="album">Isole Perdute</div>
+                </div>
+              </div>
+              <div class="seek">
+                <span id="tNow">0:47</span>
+                <div class="tr" id="seekTr"><i></i><b></b></div>
+                <span>3:34</span>
+              </div>
+              <div class="controls">
+                <button aria-label="Previous track">⏮</button>
+                <button class="main" id="playBtn" aria-label="Play or pause">⏸</button>
+                <button aria-label="Next track">⏭</button>
+              </div>
+              <div class="toggles">
+                <button id="muteBtn" title="Mute" aria-label="Toggle mute">🔊</button>
+                <button id="micBtn" title="Mic" aria-label="Toggle microphone">🎙</button>
+                <button id="cafBtn" title="Caffeine" aria-label="Toggle caffeine mode">☕</button>
+                <button title="Screenshot" aria-label="Take a screenshot">📷</button>
+              </div>
+              <div class="tiles">
+                <div class="tile">
+                  <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="3.5"/>
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="#34d64a" stroke-width="3.5"
+                      stroke-linecap="round" stroke-dasharray="84.4 100.5"
+                      transform="rotate(-90 20 20)"/>
+                  </svg>
+                  <div class="sub">84%</div>
+                </div>
+                <div class="tile"><div class="big">🔊</div><div class="sub">Volume</div></div>
+                <div class="tile" id="timerTile"><div class="big" id="timerTxt">25:00</div><div class="sub">Focus</div></div>
+                <div class="tile"><div class="big">☀️ 24°</div><div class="sub">Sunny</div></div>
+              </div>
+              <div class="sys">CPU 6%&nbsp;&nbsp;·&nbsp;&nbsp;RAM 5.9 GiB (38%)</div>
+            </section>
+          </div>
+        </div>
+        <p class="caption">click to flip faces · swipe to switch · right-click opens the card</p>
+      </div>
+
+      <div class="deck">
+        <div class="group">
+          <div class="group-label" id="faces-label">Pill faces</div>
+          <div class="chiprow" role="group" aria-labelledby="faces-label">
+            <button data-face="0">auto</button>
+            <button data-face="1">status</button>
+            <button data-face="2">lyrics</button>
+            <button data-face="3">title</button>
+            <button data-face="4">clock</button>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-label" id="peeks-label">Trigger a peek</div>
+          <div class="chiprow" role="group" aria-labelledby="peeks-label">
+            <button data-peek="volume">volume</button>
+            <button data-peek="notify">notification</button>
+            <button data-peek="charge">charger</button>
+          </div>
+        </div>
+        <p class="tip">The face deck is the app's idea: a swipe swaps what lives in the pill — now playing, clock and battery, the current lyric, or just the title.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="note">A web replica — the real app is native GTK4, WPF, AppKit and Kotlin</span>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="install.html">Install</a>
+      <a href="https://github.com/Mariakevin/LedgePill/issues">Issues</a>
+      <a href="https://github.com/Mariakevin/LedgePill/blob/main/LICENSE">License</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+const island = document.getElementById('island');
+const secs = { pill: document.getElementById('pill'),
+               peek: document.getElementById('peek'),
+               card: document.getElementById('card') };
+let state = 'pill', playing = true, pos = 47, peekTimer = 0;
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function fit(name) {
+  const el = secs[name];
+  for (const k in secs) secs[k].classList.toggle('on', k === name);
+  island.classList.toggle('expanded', name === 'card');
+  island.style.width = el.scrollWidth + 'px';
+  island.style.height = el.scrollHeight + 'px';
+  state = name === 'card' ? 'expanded' : name;
+}
+
+/* pill face deck — click cycles, swipe switches, right-click opens the card */
+const pillArt = secs.pill.querySelector('.art'),
+      pillT = document.getElementById('ptitle'),
+      pillLyric = document.getElementById('plyric'),
+      eq = secs.pill.querySelector('.eq'),
+      dot = secs.pill.querySelector('.dot'),
+      clock = document.getElementById('clock'),
+      pbat = document.getElementById('pbat');
+const FACES = ['auto', 'status', 'lyrics', 'title', 'clock'];
+let faceIdx = 0;
+const LYRICS = [
+  [0, '♪'], [42, 'Taillights paint the dashboard gold'],
+  [48, 'Half a tank and nowhere to be'], [55, 'You said turn the radio up'],
+  [62, 'So I let the night drive me'], [70, 'Halfway to nowhere, right on time'],
+  [78, 'Every wrong turn felt like mine'], [86, '♪'],
+];
+function lyricAt(s) {
+  let line = '♪';
+  for (const [t, txt] of LYRICS) if (t <= s) line = txt;
+  return line;
+}
+function syncFaceButtons() {
+  document.querySelectorAll('[data-face]').forEach(b =>
+    b.classList.toggle('on', Number(b.dataset.face) === faceIdx));
+}
+function pillFace() {
+  const face = FACES[faceIdx], music = playing;
+  for (const el of [pillArt, pillT, pillLyric]) el.style.display = 'none';
+  eq.style.display = 'none';
+  for (const el of [dot, clock, pbat]) el.style.display = 'none';
+
+  if (face === 'auto' && music) {
+    pillArt.style.display = 'block'; eq.style.display = 'flex';
+    pillT.style.display = 'block';
+    pillT.textContent = 'Halfway to Nowhere';   // title only, never the artist
+  } else if (face === 'status') {
+    clock.style.display = 'inline'; pbat.style.display = 'inline';
+  } else if (face === 'lyrics' && music) {
+    pillLyric.style.display = 'block';
+    pillLyric.textContent = lyricAt(pos);
+  } else if (face === 'title' && music) {
+    pillT.style.display = 'block';
+    pillT.textContent = 'Halfway to Nowhere';
+  } else if (face === 'clock') {
+    clock.style.display = 'inline';
+  } else {
+    dot.style.display = 'inline'; clock.style.display = 'inline';
+  }
+  syncFaceButtons();
+  if (state === 'pill') fit('pill');
+}
+function cycleFace(step) {
+  faceIdx = (faceIdx + step + FACES.length) % FACES.length;
+  pillFace();
+}
+function tickClock() {
+  const d = new Date();
+  clock.textContent = String(d.getHours()).padStart(2, '0') + ':' +
+                      String(d.getMinutes()).padStart(2, '0');
+}
+tickClock(); setInterval(tickClock, 5000);
+
+/* beat-driven EQ — kick on the beat, bar 1 = bass … bar 5 = highs */
+const bars = eq.querySelectorAll('i'), BPM = 122;
+const resp = [1.0, 0.85, 0.55, 0.4, 0.3], shim = [0.05, 0.1, 0.25, 0.35, 0.45];
+if (!reduceMotion) setInterval(() => {
+  if (!playing || state !== 'pill') return;
+  const t = performance.now() / 1000, beat = t * BPM / 60;
+  const kick = Math.pow(Math.max(0, Math.cos(beat * 2 * Math.PI)), 14);
+  const off = Math.pow(Math.max(0, Math.cos((beat + .5) * 2 * Math.PI)), 14);
+  bars.forEach((b, i) => {
+    const s = shim[i] * (0.5 + 0.5 * Math.sin(t * (7 + i * 3.1) + i));
+    const v = 0.18 + resp[i] * kick * 0.82 + s + off * 0.25 * (1 - resp[i]);
+    b.style.height = Math.max(3, Math.min(14, v * 14)) + 'px';
+  });
+}, 50);
+
+/* click cycles faces · swipe switches · right-click opens the card */
+let swiped = false, downX = null;
+island.addEventListener('pointerdown', e => { downX = e.clientX; });
+island.addEventListener('pointerup', e => {
+  if (downX !== null && state === 'pill' && Math.abs(e.clientX - downX) > 40) {
+    cycleFace(e.clientX < downX ? +1 : -1);
+    swiped = true; setTimeout(() => swiped = false, 250);
+  }
+  downX = null;
+});
+island.addEventListener('click', e => {
+  if (swiped) return;
+  if (state === 'pill' || state === 'peek') { cycleFace(+1); return; }
+  if (e.target.closest('button') || e.target.closest('#seekTr') ||
+      e.target.closest('#timerTile')) return;
+  fit('pill');   // click on empty card space closes it
+});
+island.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  fit(state === 'expanded' ? 'pill' : 'card');
+});
+island.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    fit(state === 'expanded' ? 'pill' : 'card');
+  }
+  if (e.key === 'ArrowRight' && state !== 'expanded') { e.preventDefault(); cycleFace(+1); }
+  if (e.key === 'ArrowLeft' && state !== 'expanded') { e.preventDefault(); cycleFace(-1); }
+});
+let leaveT = 0;
+island.addEventListener('mouseleave', () => {
+  if (state !== 'expanded') return;
+  leaveT = setTimeout(() => fit('pill'), 900);
+});
+island.addEventListener('mouseenter', () => clearTimeout(leaveT));
+
+/* explicit face picker under the demo */
+document.querySelectorAll('[data-face]').forEach(btn =>
+  btn.addEventListener('click', () => {
+    faceIdx = Number(btn.dataset.face);
+    if (state !== 'pill') fit('pill');
+    pillFace();
+  }));
+
+/* player */
+const playBtn = document.getElementById('playBtn'),
+      seekFill = document.querySelector('#seekTr i'),
+      seekKnob = document.querySelector('#seekTr b'),
+      tNow = document.getElementById('tNow'), LEN = 214;
+playBtn.addEventListener('click', () => {
+  playing = !playing;
+  playBtn.textContent = playing ? '⏸' : '▶';
+  pillFace();
+});
+setInterval(() => {
+  if (playing) {
+    pos = (pos + 1) % LEN; drawSeek();
+    if (FACES[faceIdx] === 'lyrics' && state === 'pill') {
+      pillLyric.textContent = lyricAt(pos);
+      fit('pill');
+    }
+  }
+}, 1000);
+function drawSeek() {
+  const f = pos / LEN * 100;
+  seekFill.style.width = f + '%'; seekKnob.style.left = f + '%';
+  tNow.textContent = Math.floor(pos / 60) + ':' + String(pos % 60).padStart(2, '0');
+}
+document.getElementById('seekTr').addEventListener('click', e => {
+  const r = e.currentTarget.getBoundingClientRect();
+  pos = Math.round((e.clientX - r.left) / r.width * LEN); drawSeek();
+});
+drawSeek();
+
+/* toggles */
+for (const id of ['muteBtn', 'micBtn', 'cafBtn'])
+  document.getElementById(id).addEventListener('click',
+    e => e.currentTarget.classList.toggle('onn'));
+
+/* focus timer */
+const timerTile = document.getElementById('timerTile'),
+      timerTxt = document.getElementById('timerTxt');
+let tLeft = 25 * 60, tRun = false;
+timerTile.addEventListener('click', () => {
+  tRun = !tRun; timerTile.classList.toggle('run', tRun);
+});
+setInterval(() => {
+  if (!tRun) return;
+  tLeft = Math.max(0, tLeft - 1);
+  timerTxt.textContent = String(Math.floor(tLeft / 60)).padStart(2, '0') + ':' +
+                         String(tLeft % 60).padStart(2, '0');
+  if (!tLeft) { tRun = false; timerTile.classList.remove('run'); tLeft = 25 * 60; }
+}, 1000);
+
+/* peeks */
+const peeks = {
+  volume: { ico: '🔊', t: '62%', b: '', bar: 62 },
+  notify: { ico: '📅', t: 'Standup in 10 minutes', b: 'Team sync · Room 2' },
+  charge: { ico: '⚡', t: 'Charging', b: '84%' },
+};
+document.querySelectorAll('[data-peek]').forEach(btn =>
+  btn.addEventListener('click', () => showPeek(peeks[btn.dataset.peek])));
+function showPeek(p) {
+  if (state === 'expanded') return;
+  secs.peek.querySelector('.ico').textContent = p.ico;
+  secs.peek.querySelector('.pt').textContent = p.t;
+  secs.peek.querySelector('.pb').textContent = p.b || '';
+  secs.peek.querySelector('.pb').style.display = p.b ? 'block' : 'none';
+  const bar = secs.peek.querySelector('.bar');
+  bar.style.display = p.bar != null ? 'block' : 'none';
+  if (p.bar != null) bar.querySelector('i').style.width = p.bar + '%';
+  fit('peek');
+  clearTimeout(peekTimer);
+  peekTimer = setTimeout(() => { if (state === 'peek') fit('pill'); }, 2200);
+}
+
+pillFace();
+fit('pill');
+addEventListener('resize', () => fit(state === 'expanded' ? 'card' : state));
+</script>
+</body>
+</html>

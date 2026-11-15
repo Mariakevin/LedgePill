@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <b><a href="https://mariakevin.github.io/LedgePill/">▶ Play with the interactive demo in your browser</a></b>
+  <b><a href="https://mariakevin.github.io/LedgePill/demo.html">▶ Play with the interactive demo in your browser</a></b>
 </p>
 
 ---
@@ -385,8 +385,9 @@ python -m unittest discover tests    # tests
 
 The screenshots in `docs/` are generated, not hand-cropped — real widgets, real
 CSS, rendered headless: `scripts/render-shots.py`. The demo GIF is recorded
-the same way (`scripts/record-demo.py`), and the browser demo lives in
-`docs/index.html`, published at <https://mariakevin.github.io/LedgePill/>.
+the same way (`scripts/record-demo.py`). The docs site is three static pages in
+`docs/` — `index.html`, `demo.html`, `install.html`, sharing `style.css` —
+published at <https://mariakevin.github.io/LedgePill/>.
 
 ---
 
