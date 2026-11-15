@@ -60,7 +60,7 @@ It is **one open-source project** with the same design language on every platfor
 |---|---|
 | **What it is** | A Dynamic Island for your desktop — pill, peeks and a full card |
 | **Platforms** | Linux (flagship) · Windows · macOS · Android (beta) |
-| **Built with** | GTK4 · WPF (.NET 8) · AppKit (Swift) · Kotlin — no Electron, no web views |
+| **Built with** | GTK4 · WPF (.NET 10) · AppKit (Swift) · Kotlin — no Electron, no web views |
 | **Footprint** | ≈ 0.2 % idle CPU, ≈ 110 MB PSS on KDE Plasma / Wayland |
 | **Install** | Arch, Debian/Ubuntu, Fedora, or one script |
 | **License** | MIT |
@@ -273,7 +273,7 @@ Linux flagship.
 
 | Platform | Stack | Media source | Get it |
 |---|---|---|---|
-| Windows 10/11 (x64) | WPF (.NET 8) | system media session (SMTC) | `LedgePill.exe` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
+| Windows 10/11 (x64) | WPF (.NET 10) | system media session (SMTC) | `LedgePill.exe` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
 | macOS 13+ | AppKit (Swift) | Spotify / Apple Music | `LedgePill-macos.zip` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
 | Android 8+ | Kotlin | any media session | `app-release.apk` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
 

@@ -22,9 +22,10 @@ What it actually takes, reviewed 2026-11-12.
 - **Target API level**: since **Aug 31 2026, new apps and updates must target
   API 36 (Android 16)**; existing apps need API 35 to stay visible. See the
   [current Google Play target API requirements](https://developer.android.com/google/play/requirements/target-sdk).
-  This project currently compiles and targets API 34 for sideloading; a Play
-  build needs both `compileSdk = 36` and `targetSdk = 36`, plus a re-test of
-  overlay and foreground-service behavior (both change across Android releases).
+  This project now compiles against API 37 while still targeting API 36, so
+  the Play target-API requirement is met; a Play build still needs a
+  re-test of overlay and foreground-service behavior (both change across
+  Android releases).
 - **Sensitive access must be justified in review**:
   - `SYSTEM_ALERT_WINDOW` (the overlay) — explain it *is* the product.
   - Notification access (`BIND_NOTIFICATION_LISTENER_SERVICE`) — declare

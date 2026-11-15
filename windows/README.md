@@ -16,12 +16,12 @@ no peek notifications, tiles or pomodoro here.
     dotnet publish windows/LedgePill.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 
 The release executable bundles the .NET runtime and runs without a separate
-runtime installation. The .NET 8 SDK is needed only to build from source.
+runtime installation. The .NET 10 SDK is needed only to build from source.
 Release binaries target x64 and are unsigned, so Windows SmartScreen may show
 a warning. Download them only from the project's official Releases page.
 
 ## Run at startup
 
 Press Win+R, type `shell:startup`, and drop a shortcut to `LedgePill.exe`
-(found under `windows/bin/Release/net8.0-windows10.0.19041.0/win-x64/publish/`)
+(found under `windows/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/`)
 into the folder that opens.

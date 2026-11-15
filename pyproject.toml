@@ -10,7 +10,7 @@ readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "Marco Zorn", email = "m@zorn.it" }]
 requires-python = ">=3.11"
-dependencies = ["PyGObject>=3.46"]
+dependencies = ["PyGObject>=3.48"]
 
 [project.urls]
 Homepage = "https://github.com/Mariakevin/LedgePill"

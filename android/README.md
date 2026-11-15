@@ -158,8 +158,9 @@ signatures differ.
     cd android
     gradle assembleRelease
 
-Needs Gradle 8.7+ and JDK 17 (CI uses Gradle 8.9, no wrapper). Without signing
-environment variables, Gradle produces an unsigned APK for local validation.
+Needs Gradle 9.6+ and JDK 17 (CI uses Gradle 9.6.0 with AGP 9.5's built-in
+Kotlin, no wrapper). Without signing environment variables, Gradle produces an
+unsigned APK for local validation.
 To sign a release, set `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`,
 `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` in the environment. The GitHub
 release workflow reads the corresponding repository Actions secrets
