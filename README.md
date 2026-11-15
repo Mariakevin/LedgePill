@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <b><a href="https://marcozorn.github.io/lost-island/">▶ Play with the interactive demo in your browser</a></b>
+  <b><a href="https://mariakevin.github.io/LedgePill/">▶ Play with the interactive demo in your browser</a></b>
 </p>
 
 ---
@@ -386,7 +386,7 @@ python -m unittest discover tests    # tests
 The screenshots in `docs/` are generated, not hand-cropped — real widgets, real
 CSS, rendered headless: `scripts/render-shots.py`. The demo GIF is recorded
 the same way (`scripts/record-demo.py`), and the browser demo lives in
-`docs/index.html`.
+`docs/index.html`, published at <https://mariakevin.github.io/LedgePill/>.
 
 ---
 
