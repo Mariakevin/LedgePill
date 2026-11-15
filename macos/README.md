@@ -1,4 +1,4 @@
-# Lost Island for macOS
+# LedgePill for macOS
 
 Companion to the Linux app in the repo root: a Dynamic Island for the Mac.
 A small pill floats just under the menu bar showing the time; when Spotify
@@ -11,13 +11,13 @@ else lives in the Linux flagship.
 ## Build
 
     swift build -c release
-    ./make-app.sh    # produces LostIsland.app and LostIsland-macos.zip
+    ./make-app.sh    # produces LedgePill.app and LedgePill-macos.zip
 
 Needs macOS 13+ and the Xcode command line tools. No dependencies.
 
 ## First run
 
-- Unsigned release/build: right-click LostIsland.app, Open, to confirm the
+- Unsigned release/build: right-click LedgePill.app, Open, to confirm the
   first launch through Gatekeeper. Download releases only from the project's
   official Releases page.
 - The first playback poll triggers a "wants to control Spotify/Music"
@@ -25,4 +25,4 @@ Needs macOS 13+ and the Xcode command line tools. No dependencies.
 
 ## Autostart
 
-System Settings → General → Login Items → add LostIsland.app.
+System Settings → General → Login Items → add LedgePill.app.

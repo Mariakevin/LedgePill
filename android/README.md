@@ -1,6 +1,6 @@
-# Lost Island for Android
+# LedgePill for Android
 
-Companion to the Lost Island desktop overlay: a floating pill that sits at
+Companion to the LedgePill desktop overlay: a floating pill that sits at
 the very top of the screen — over the punch-hole camera, like a real Dynamic
 Island — showing the clock, the current track, notifications and more.
 Feature parity with desktop v1.3 where Android allows it.
@@ -131,10 +131,10 @@ settings pages and shows current status.
 Sideloaded apps get the notification-access toggle locked by default — it
 shows greyed out with a "restricted setting" message. Unlock it once:
 
-1. Open **App info** for Lost Island (the onboarding screen has a button).
+1. Open **App info** for LedgePill (the onboarding screen has a button).
 2. Tap the **⋮ menu** in the top-right corner.
 3. Choose **Allow restricted settings** and confirm.
-4. Go back to **Notification access** and enable Lost Island.
+4. Go back to **Notification access** and enable LedgePill.
 
 The onboarding screen detects the situation and walks you through exactly
 this.

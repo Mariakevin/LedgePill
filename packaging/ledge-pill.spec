@@ -3,7 +3,7 @@ Version:        1.0.0
 Release:        1%{?dist}
 Summary:        A Dynamic Island for your Linux desktop
 License:        MIT
-URL:            https://github.com/Mariakevin/ledge-pill-next
+URL:            https://github.com/Mariakevin/LedgePill
 Source0:        %{url}/archive/refs/tags/v%{version}.tar.gz
 BuildArch:      noarch
 Requires:       python3 >= 3.11, python3-gobject, python3-cairo, gtk4, gtk4-layer-shell, libadwaita, pulseaudio-utils

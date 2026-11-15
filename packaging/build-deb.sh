@@ -54,7 +54,7 @@ Architecture: all
 Depends: python3 (>= 3.11), python3-gi, python3-gi-cairo, gir1.2-gtk-4.0, gir1.2-adw-1, pulseaudio-utils
 Recommends: alsa-utils, libgtk4-layer-shell0, network-manager, upower, cava
 Maintainer: Marco Zorn <m@zorn.it>
-Homepage: https://github.com/Mariakevin/ledge-pill-next
+Homepage: https://github.com/Mariakevin/LedgePill
 Description: Dynamic Island for the Linux desktop
  A fluid, always-on-top island at the top of your screen: music with
  full controls and album art, volume OSD, battery, notifications and a

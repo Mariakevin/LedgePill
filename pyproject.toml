@@ -13,7 +13,7 @@ requires-python = ">=3.11"
 dependencies = ["PyGObject>=3.46"]
 
 [project.urls]
-Homepage = "https://github.com/Mariakevin/ledge-pill-next"
+Homepage = "https://github.com/Mariakevin/LedgePill"
 
 [project.scripts]
 ledge-pill = "ledgepill.app:main"

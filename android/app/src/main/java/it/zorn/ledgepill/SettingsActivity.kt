@@ -140,7 +140,7 @@ class SettingsActivity : AppCompatActivity() {
             "?"
         }
         root.add(text("LedgePill $version", 15f, Color.WHITE), top = dp(12))
-        root.add(text("github.com/Mariakevin/ledge-pill-next", 13f, DIM), top = dp(4))
+        root.add(text("github.com/Mariakevin/LedgePill", 13f, DIM), top = dp(4))
 
         setContentView(ScrollView(this).apply {
             setBackgroundColor(0xFF0C0C0E.toInt())

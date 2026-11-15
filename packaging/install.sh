@@ -1,10 +1,10 @@
 #!/bin/bash
 # Universal installer for LedgePill (Linux).
 #   from a checkout:  sudo ./packaging/install.sh [--autostart]
-#   from anywhere:    curl -fsSL https://raw.githubusercontent.com/Mariakevin/ledge-pill-next/main/packaging/install.sh | sudo bash
+#   from anywhere:    curl -fsSL https://raw.githubusercontent.com/Mariakevin/LedgePill/main/packaging/install.sh | sudo bash
 set -euo pipefail
 
-REPO="https://github.com/Mariakevin/ledge-pill-next"
+REPO="https://github.com/Mariakevin/LedgePill"
 PREFIX=/usr/local
 
 say() { printf '\033[1;33m[ledge-pill]\033[0m %s\n' "$*"; }
