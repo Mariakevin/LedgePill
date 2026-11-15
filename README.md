@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="data/ledge-pill.svg" width="120" alt="LedgePill logo">
-</p>
-
 <h1 align="center">LedgePill</h1>
 
 <p align="center">
@@ -9,19 +5,6 @@
   A little black island lives at the top of your screen. It breathes with your music,<br>
   peeks when something happens, and blooms into a full card when you ask.<br>
   <i>Fluid. Native. Light on your battery.</i>
-</p>
-
-<p align="center">
-  <a href="https://github.com/Mariakevin/LedgePill/actions/workflows/build.yml"><img src="https://github.com/Mariakevin/LedgePill/actions/workflows/build.yml/badge.svg" alt="build"></a>
-  <img src="https://img.shields.io/badge/version-1.0.0-ff9f0a.svg" alt="version">
-  <img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="MIT">
-  <img src="https://img.shields.io/badge/GTK-4-blue.svg" alt="GTK4">
-  <img src="https://img.shields.io/badge/platforms-Linux%20%C2%B7%20Windows%20%C2%B7%20macOS%20%C2%B7%20Android-8A2BE2" alt="platforms">
-  <a href="https://github.com/Mariakevin/LedgePill/stargazers"><img src="https://img.shields.io/github/stars/Mariakevin/LedgePill?style=social" alt="GitHub stars"></a>
-</p>
-
-<p align="center">
-  <img src="docs/demo.gif" width="640" alt="LedgePill in motion">
 </p>
 
 <p align="center">
@@ -53,17 +36,6 @@ LedgePill is a **native, cross-platform Dynamic Island** — the small, animated
 It is **one open-source project** with the same design language on every platform, built with **zero web runtimes** — GTK4 on Linux, WPF on Windows, AppKit on macOS, Kotlin on Android. No Electron. No web views. Just native widgets and a shared aesthetic.
 
 > Most of the time it's a quiet pill with the clock. Play some music and it picks up the track. Touch your volume keys and it becomes an OSD. Plug in the charger, connect your earbuds, switch Wi-Fi, or get a notification and it **peeks** to tell you — then melts back into a pill. Click it and it **blooms** into a full card.
-
-<p align="center">
-  <img src="docs/shot-pill.png" width="260" alt="Idle pill">
-  <img src="docs/shot-music-pill.png" width="260" alt="Music pill">
-  <img src="docs/shot-volume.png" width="260" alt="Volume peek">
-</p>
-<p align="center">
-  <img src="docs/shot-notification.png" width="260" alt="Notification peek">
-  <img src="docs/shot-expanded.png" width="260" alt="Expanded card">
-  <img src="docs/shot-settings.png" width="260" alt="Settings">
-</p>
 
 ---
 
