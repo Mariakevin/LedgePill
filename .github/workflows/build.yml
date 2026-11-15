@@ -94,19 +94,6 @@ jobs:
           name: LedgePill-windows-x64
           path: dist/windows/LedgePill.exe
 
-  macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v7
-      - name: Build
-        run: cd macos && swift build -c release
-      - name: Bundle app
-        run: cd macos && ./make-app.sh
-      - uses: actions/upload-artifact@v7
-        with:
-          name: LedgePill-macos
-          path: macos/LedgePill-macos.zip
-
   android:
     runs-on: ubuntu-latest
     steps:
@@ -149,7 +136,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [linux, rpm, windows, macos, android]
+    needs: [linux, rpm, windows, android]
     runs-on: ubuntu-latest
     concurrency:
       group: release-${{ github.ref }}
@@ -169,7 +156,6 @@ jobs:
             artifacts/ledge-pill-deb/*.deb
             artifacts/ledge-pill-rpm/*.rpm
             artifacts/LedgePill-windows-x64/LedgePill.exe
-            artifacts/LedgePill-macos/LedgePill-macos.zip
             artifacts/LedgePill-android/app-release.apk
           )
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then

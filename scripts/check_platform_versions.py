@@ -21,14 +21,6 @@ def main() -> int:
             ROOT / "android/app/build.gradle.kts",
             r'^\s*versionName\s*=\s*"([^"]+)"',
         ),
-        "macOS bundle version": (
-            ROOT / "macos/make-app.sh",
-            r"<key>CFBundleShortVersionString</key>\s*<string>([^<]+)</string>",
-        ),
-        "macOS build version": (
-            ROOT / "macos/make-app.sh",
-            r"<key>CFBundleVersion</key>\s*<string>([^<]+)</string>",
-        ),
     }
 
     errors: list[str] = []

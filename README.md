@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  Linux &nbsp;·&nbsp; Windows &nbsp;·&nbsp; macOS &nbsp;·&nbsp; Android &nbsp;&nbsp;|&nbsp;&nbsp; v1.0.0 &nbsp;·&nbsp; MIT
+  Linux &nbsp;·&nbsp; Windows &nbsp;·&nbsp; Android &nbsp;&nbsp;|&nbsp;&nbsp; v1.0.0 &nbsp;·&nbsp; MIT
 </p>
 
 <p align="center">
@@ -27,9 +27,9 @@ ledge-pill                                        # run it
 systemctl --user enable --now ledge-pill.service  # keep it
 ```
 
-Package-manager installs for Arch, Debian/Ubuntu and Fedora, plus the Windows,
-macOS and Android builds, are in [Install](#install) and
-[Windows, macOS, Android](#windows-macos-android).
+Package-manager installs for Arch, Debian/Ubuntu and Fedora, plus the Windows
+and Android builds, are in [Install](#install) and
+[Windows and Android](#windows-and-android).
 
 ---
 
@@ -40,7 +40,7 @@ macOS and Android builds, are in [Install](#install) and
 | [What is LedgePill?](#what-is-ledgepill) | [Light on your battery](#light-on-your-battery--by-architecture) |
 | [Feature tour](#feature-tour) | [Architecture](#architecture) |
 | [Install](#install) | [Configuration](#configuration) |
-| [Windows, macOS, Android](#windows-macos-android) | [CLI](#cli) |
+| [Windows and Android](#windows-and-android) | [CLI](#cli) |
 | [FAQ](#faq) | [Hacking](#hacking) |
 | [License](#license) | [Design system](#design-system) |
 
@@ -50,7 +50,7 @@ macOS and Android builds, are in [Install](#install) and
 
 LedgePill is a **native, cross-platform Dynamic Island** — the small, animated pill that lives at the top of your screen and reacts to everything: music, volume, battery, notifications, network, Bluetooth, weather, your Pomodoro timer, even your AI assistant.
 
-It is **one open-source project** with the same design language on every platform, built with **zero web runtimes** — GTK4 on Linux, WPF on Windows, AppKit on macOS, Kotlin on Android. No Electron. No web views. Just native widgets and a shared aesthetic.
+It is **one open-source project** with the same design language on every platform, built with **zero web runtimes** — GTK4 on Linux, WPF on Windows, Kotlin on Android. No Electron. No web views. Just native widgets and a shared aesthetic.
 
 > Most of the time it's a quiet pill with the clock. Play some music and it picks up the track. Touch your volume keys and it becomes an OSD. Plug in the charger, connect your earbuds, switch Wi-Fi, or get a notification and it **peeks** to tell you — then melts back into a pill. Click it and it **blooms** into a full card.
 
@@ -59,8 +59,8 @@ It is **one open-source project** with the same design language on every platfor
 | | |
 |---|---|
 | **What it is** | A Dynamic Island for your desktop — pill, peeks and a full card |
-| **Platforms** | Linux (flagship) · Windows · macOS · Android (beta) |
-| **Built with** | GTK4 · WPF (.NET 10) · AppKit (Swift) · Kotlin — no Electron, no web views |
+| **Platforms** | Linux (flagship) · Windows · Android (beta) |
+| **Built with** | GTK4 · WPF (.NET 10) · Kotlin — no Electron, no web views |
 | **Footprint** | ≈ 0.2 % idle CPU, ≈ 110 MB PSS on KDE Plasma / Wayland |
 | **Install** | Arch, Debian/Ubuntu, Fedora, or one script |
 | **License** | MIT |
@@ -218,7 +218,7 @@ Single instance. Layer surface anchors to the top edge and hugs the island exact
 | **Debian 12+ / Ubuntu 24.04+** | `.deb` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
 | **Fedora** | `.rpm` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
 | **Any distro** | `packaging/install.sh` |
-| **Windows / macOS / Android** | See [below](#windows-macos-android) |
+| **Windows / Android** | See [below](#windows-and-android) |
 
 ### Arch Linux
 
@@ -264,7 +264,7 @@ On GNOME Wayland (no layer-shell for apps) it falls back to a plain floating win
 
 ---
 
-## Windows, macOS, Android
+## Windows and Android
 
 Native companion apps live in this repo — same island, same design language,
 built per-platform with **zero web runtimes**. They cover the core feature set
@@ -274,7 +274,6 @@ Linux flagship.
 | Platform | Stack | Media source | Get it |
 |---|---|---|---|
 | Windows 10/11 (x64) | WPF (.NET 10) | system media session (SMTC) | `LedgePill.exe` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
-| macOS 13+ | AppKit (Swift) | Spotify / Apple Music | `LedgePill-macos.zip` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
 | Android 8+ | Kotlin | any media session | `app-release.apk` from [Releases](https://github.com/Mariakevin/LedgePill/releases) |
 
 The Android app hugs the display cutout like the real thing, cycles pill
@@ -284,12 +283,11 @@ developer" prompt — choose *Install anyway*. On Android 13+ the
 notification-access toggle is locked for sideloaded apps until you open
 *App info → ⋮ → Allow restricted settings*; the app walks you through it.
 
-Build notes for each live in [`windows/`](windows/), [`macos/`](macos/) and
+Build notes for each live in [`windows/`](windows/) and
 [`android/`](android/).
 
-Windows and macOS release binaries are currently unsigned. Windows may show
-a SmartScreen warning; macOS requires the first-launch confirmation described
-in its build notes. Download binaries only from the project's official
+Windows release binaries are currently unsigned. Windows may show
+a SmartScreen warning. Download binaries only from the project's official
 Releases page.
 
 ---
@@ -409,10 +407,10 @@ MPRIS media controls, volume OSD, notification peeks, all measured at
 ~0.2 % idle CPU. Arch, Debian/Ubuntu and Fedora packages are in
 [Releases](https://github.com/Mariakevin/LedgePill/releases).
 
-### Does it work on Windows 11 or macOS?
+### Does it work on Windows 11?
 
-Yes — native companions (WPF on Windows, AppKit on macOS) with the same
-look: clock pill, now-playing with album art, media controls. Both are
+Yes — a native companion (WPF on Windows) with the same
+look: clock pill, now-playing with album art, media controls. It is
 prebuilt on every release.
 
 ### How is this different from the notch / punch hole "island" apps?

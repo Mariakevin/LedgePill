@@ -12,11 +12,6 @@ windows/bin/
 windows/obj/
 *.user
 
-# --- macOS ---
-macos/.build/
-macos/*.app/
-macos/LedgePill-macos.zip
-
 # --- Android ---
 android/.gradle/
 android/build/
