@@ -286,6 +286,9 @@ notification-access toggle is locked for sideloaded apps until you open
 Build notes for each live in [`windows/`](windows/) and
 [`android/`](android/).
 
+Privacy policy: https://mariakevin.github.io/LedgePill/privacy.html (required for the Google Play listing).
+Play Store track is in progress; an AAB is now built in CI on tags.
+
 Windows release binaries are currently unsigned. Windows may show
 a SmartScreen warning. Download binaries only from the project's official
 Releases page.

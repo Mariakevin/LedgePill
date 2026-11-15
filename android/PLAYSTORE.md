@@ -2,6 +2,27 @@
 
 What it actually takes, reviewed 2026-11-12.
 
+## Progress
+
+Done:
+- [x] targetSdk 36
+- [x] compileSdk 37
+- [x] AAB build in CI (`LedgePill-android-bundle` artifact on tags)
+- [x] manifest exported flags correct
+- [x] allowBackup false
+- [x] signing keystore provisioned
+- [x] privacy policy page (https://mariakevin.github.io/LedgePill/privacy.html)
+- [x] Play Protect install workaround documented
+
+Pending (user action):
+- [ ] Play Console account + $25
+- [ ] D-U-N-S (if org)
+- [ ] closed test with ≥12 testers × 14 days (personal account)
+- [ ] data safety form
+- [ ] content rating questionnaire
+- [ ] upload AAB
+- [ ] Play Protect review request
+
 ## Account
 
 - **$25 one-time** Google Play developer registration.

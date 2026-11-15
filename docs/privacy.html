@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy — LedgePill</title>
+<meta name="description" content="Privacy policy for LedgePill: a native Dynamic Island for Linux, Windows and Android. Nothing is collected; everything stays on your device.">
+<meta name="theme-color" content="#08080d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2308080d'/%3E%3Crect x='6' y='12' width='20' height='8' rx='4' fill='%23fff'/%3E%3Ccircle cx='23.5' cy='16' r='1.6' fill='%23ff9f0a'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true"></span> LedgePill
+    </a>
+    <nav class="topnav">
+      <a href="index.html">Home</a>
+      <a href="demo.html">Demo</a>
+      <a href="install.html">Install</a>
+      <a class="hide-sm" href="https://github.com/Mariakevin/LedgePill/releases">Releases</a>
+      <a class="cta" href="https://github.com/Mariakevin/LedgePill">Star on GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="page-head">
+    <p class="eyebrow"><i aria-hidden="true"></i> Privacy policy</p>
+    <h1>Privacy <span class="grad">policy.</span></h1>
+    <p class="lede">
+      LedgePill is a native Dynamic Island app for Linux, Windows and Android.
+      This policy covers all platforms; the Android app is the one submitted to
+      Google Play.
+    </p>
+  </section>
+
+  <section class="section" aria-label="What we collect">
+    <h2>What we collect</h2>
+    <p>Nothing. No personal data is collected, transmitted, or stored on any
+    server. Everything stays on your device.</p>
+  </section>
+
+  <section class="section" aria-label="What the app reads and why">
+    <h2>What the app reads and why</h2>
+    <ul>
+      <li>Notifications are mirrored passively: titles are read only to display
+      in the island, and are never sent anywhere.</li>
+      <li>Media track title, artist, album and artwork via MPRIS, the system
+      media session, or media sessions — shown on an on-screen card only.</li>
+      <li>System state (volume, battery, network, Bluetooth, weather) is read
+      locally and displayed locally.</li>
+      <li>Webhooks: loopback-only HTTP on 127.0.0.1, with a bearer token
+      stored locally with owner-only permissions. Only local scripts you
+      authorize can reach it.</li>
+    </ul>
+  </section>
+
+  <section class="section" aria-label="Network requests the app makes">
+    <h2>Network requests the app makes</h2>
+    <ul>
+      <li>Weather: your place name to wttr.in (no personal data).</li>
+      <li>Lyrics: song title and artist to lrclib.net (nothing personal).</li>
+      <li>Information feeds (RSS/Atom/JSON) from URLs you configure.</li>
+      <li>AI assistant (opt-in, disabled by default): when enabled with a
+      remote provider (Claude, Gemini, OpenRouter), live device context can be
+      shared with that provider; local providers (Ollama, LM Studio) stay on
+      device. Destructive actions always require confirmation.</li>
+      <li>Developer activity: process names only (Claude Code, Codex, Aider,
+      OpenCode, Goose). Prompts and command text are never retained or
+      displayed.</li>
+    </ul>
+  </section>
+
+  <section class="section" aria-label="What we don't do">
+    <h2>What we don&rsquo;t do</h2>
+    <p>No analytics, no ads, no tracking, no third-party SDKs, no account
+    creation, and no data sold or shared with third parties.</p>
+  </section>
+
+  <section class="section" aria-label="Storage">
+    <h2>Storage</h2>
+    <p>Config, notification history (up to 50 entries, owner-only
+    permissions), the webhook token, and the task list are all local files.
+    &ldquo;Clear&rdquo; removes notification history.</p>
+  </section>
+
+  <section class="section" aria-label="Children">
+    <h2>Children</h2>
+    <p>The app is not directed at children, and no data is collected from
+    anyone.</p>
+  </section>
+
+  <section class="section" aria-label="Changes">
+    <h2>Changes</h2>
+    <p>This policy may update; the &ldquo;Last updated&rdquo; date below
+    reflects the latest revision.</p>
+  </section>
+
+  <section class="section" aria-label="Contact">
+    <h2>Contact</h2>
+    <p><a href="mailto:m@zorn.it">m@zorn.it</a></p>
+    <p class="fineprint">Last updated: 2026-11-15</p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="note">MIT licensed · built for Linux first</span>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="demo.html">Demo</a>
+      <a href="install.html">Install</a>
+      <a href="privacy.html" aria-current="page">Privacy</a>
+      <a href="https://github.com/Mariakevin/LedgePill">GitHub</a>
+      <a href="https://github.com/Mariakevin/LedgePill/issues">Issues</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>
