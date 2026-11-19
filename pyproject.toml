@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "A Dynamic Island for your Linux desktop — fluid, native, and light on your battery"
 readme = "README.md"
 license = { text = "MIT" }
-authors = [{ name = "Marco Zorn", email = "m@zorn.it" }]
+authors = [{ name = "Maria Kevin", email = "mariakevin0504@gmail.com" }]
 requires-python = ">=3.11"
 dependencies = ["PyGObject>=3.48"]
 
